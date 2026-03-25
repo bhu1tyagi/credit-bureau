@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { getRiskTier, RISK_TIER_COLORS, SCORE_MAX, SCORE_MIN } from "~~/types/credit";
-import { cn } from "~~/lib/utils";
 import { gaugeAnimation } from "~~/lib/animations";
+import { cn } from "~~/lib/utils";
+import { RISK_TIER_COLORS, SCORE_MAX, SCORE_MIN, getRiskTier } from "~~/types/credit";
 
 interface ScoreGaugeProps {
   score: number;
@@ -34,7 +34,7 @@ export default function ScoreGauge({ score, size = "md", animated = true }: Scor
   // Animated counter
   const motionScore = useMotionValue(animated ? SCORE_MIN : score);
   const springScore = useSpring(motionScore, { stiffness: 50, damping: 15 });
-  const displayScore = useTransform(springScore, (v) => Math.round(v));
+  const displayScore = useTransform(springScore, v => Math.round(v));
 
   useEffect(() => {
     motionScore.set(score);
@@ -59,20 +59,11 @@ export default function ScoreGauge({ score, size = "md", animated = true }: Scor
       style={{ width: dims.container, height: dims.container }}
     >
       {/* Glow effect */}
-      <div
-        className="absolute inset-0 rounded-full opacity-20 blur-xl"
-        style={{ backgroundColor: tierColor }}
-      />
+      <div className="absolute inset-0 rounded-full opacity-20 blur-xl" style={{ backgroundColor: tierColor }} />
 
       <svg viewBox="0 0 200 200" className="w-full h-full -rotate-0">
         {/* Background arc */}
-        <path
-          d={describeArc}
-          fill="none"
-          stroke="#2A2F4D"
-          strokeWidth={dims.strokeWidth}
-          strokeLinecap="round"
-        />
+        <path d={describeArc} fill="none" stroke="#2A2F4D" strokeWidth={dims.strokeWidth} strokeLinecap="round" />
 
         {/* Foreground arc */}
         <motion.path
@@ -94,15 +85,8 @@ export default function ScoreGauge({ score, size = "md", animated = true }: Scor
 
       {/* Center text */}
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <motion.span
-          className="font-mono font-bold text-white"
-          style={{ fontSize: dims.fontSize }}
-        >
-          {animated ? (
-            <motion.span>{displayScore}</motion.span>
-          ) : (
-            score
-          )}
+        <motion.span className="font-mono font-bold text-white" style={{ fontSize: dims.fontSize }}>
+          {animated ? <motion.span>{displayScore}</motion.span> : score}
         </motion.span>
         <span
           className="font-medium tracking-wide uppercase"

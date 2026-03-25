@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { Search } from "lucide-react";
 import { isAddress } from "viem";
-import { RISK_TIER_COLORS, type RiskTier } from "~~/types/credit";
-import { truncateAddress } from "~~/lib/utils";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
+import { truncateAddress } from "~~/lib/utils";
+import { RISK_TIER_COLORS, type RiskTier } from "~~/types/credit";
 
 interface SearchResult {
   address: string;
@@ -69,7 +69,7 @@ export default function ExplorerPage() {
             <input
               type="text"
               value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              onChange={e => setQuery(e.target.value)}
               placeholder="Enter wallet address (0x...)"
               className="flex-1 px-4 py-3 bg-[#1A1F3D] border border-[#2A2F4D] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all font-mono text-sm"
             />
@@ -86,9 +86,7 @@ export default function ExplorerPage() {
 
         {/* Error */}
         {error && (
-          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-6">
-            {error}
-          </div>
+          <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm mb-6">{error}</div>
         )}
 
         {/* Search Result */}
@@ -132,18 +130,22 @@ export default function ExplorerPage() {
         )}
 
         {/* Recently Scored Wallets */}
-        <RecentlyScored onSelect={(addr) => {
-          setQuery(addr);
-          setResult(null);
-          setError(null);
-        }} />
+        <RecentlyScored
+          onSelect={addr => {
+            setQuery(addr);
+            setResult(null);
+            setError(null);
+          }}
+        />
       </div>
     </div>
   );
 }
 
 function RecentlyScored({ onSelect }: { onSelect: (address: string) => void }) {
-  const [wallets, setWallets] = useState<{ wallet_address: string; score: number; risk_tier: string; created_at: string }[]>([]);
+  const [wallets, setWallets] = useState<
+    { wallet_address: string; score: number; risk_tier: string; created_at: string }[]
+  >([]);
 
   useEffect(() => {
     fetch("/api/v1/recent-scores")
@@ -156,7 +158,9 @@ function RecentlyScored({ onSelect }: { onSelect: (address: string) => void }) {
     return (
       <section>
         <h2 className="text-lg font-semibold text-white mb-4">Recently Scored</h2>
-        <p className="text-gray-500 text-sm">No wallets have been scored yet. Search any address above to get started.</p>
+        <p className="text-gray-500 text-sm">
+          No wallets have been scored yet. Search any address above to get started.
+        </p>
       </section>
     );
   }

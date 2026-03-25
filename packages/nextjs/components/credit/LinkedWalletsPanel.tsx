@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Wallet, Plus, Trash2, Shield } from "lucide-react";
-import type { LinkedWallet } from "~~/types/credit";
-import { truncateAddress } from "~~/lib/utils";
+import { Plus, Shield, Trash2, Wallet } from "lucide-react";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
+import { truncateAddress } from "~~/lib/utils";
+import type { LinkedWallet } from "~~/types/credit";
 
 interface LinkedWalletsPanelProps {
   wallets: LinkedWallet[];
@@ -20,11 +20,7 @@ const CHAIN_COLORS: Record<string, string> = {
   base: "#0052FF",
 };
 
-export default function LinkedWalletsPanel({
-  wallets,
-  onLinkWallet,
-  onUnlinkWallet,
-}: LinkedWalletsPanelProps) {
+export default function LinkedWalletsPanel({ wallets, onLinkWallet, onUnlinkWallet }: LinkedWalletsPanelProps) {
   return (
     <div className="rounded-xl border border-[#2A2F4D] bg-[#1A1F3D]/50 backdrop-blur-sm p-5">
       <div className="flex items-center justify-between mb-4">
@@ -41,13 +37,8 @@ export default function LinkedWalletsPanel({
         </button>
       </div>
 
-      <motion.div
-        className="space-y-2"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-      >
-        {wallets.map((wallet) => (
+      <motion.div className="space-y-2" variants={staggerContainer} initial="initial" animate="animate">
+        {wallets.map(wallet => (
           <motion.div
             key={wallet.id}
             variants={staggerItem}
@@ -64,9 +55,7 @@ export default function LinkedWalletsPanel({
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm text-white">
-                    {truncateAddress(wallet.address)}
-                  </span>
+                  <span className="font-mono text-sm text-white">{truncateAddress(wallet.address)}</span>
                   {wallet.isPrimary && (
                     <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400">
                       <Shield className="w-2.5 h-2.5" />
@@ -94,10 +83,7 @@ export default function LinkedWalletsPanel({
           <div className="rounded-lg border border-dashed border-[#2A2F4D] py-8 text-center">
             <Wallet className="w-8 h-8 text-gray-600 mx-auto mb-2" />
             <p className="text-sm text-gray-500">No wallets linked yet</p>
-            <button
-              onClick={onLinkWallet}
-              className="mt-2 text-xs text-blue-400 hover:underline"
-            >
+            <button onClick={onLinkWallet} className="mt-2 text-xs text-blue-400 hover:underline">
               Link your first wallet
             </button>
           </div>

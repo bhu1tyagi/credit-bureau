@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "~~/lib/supabase/server";
 import crypto from "crypto";
+import { createServerClient } from "~~/lib/supabase/server";
 
 const VALID_EVENTS = ["score_change", "liquidation", "attestation_expired", "attestation_created"];
 
@@ -10,29 +10,20 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: { code: "INVALID_BODY", message: "Invalid JSON body" } },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: { code: "INVALID_BODY", message: "Invalid JSON body" } }, { status: 400 });
   }
 
   const { url, events } = body;
 
   if (!url) {
-    return NextResponse.json(
-      { error: { code: "MISSING_PARAM", message: "url is required" } },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: { code: "MISSING_PARAM", message: "url is required" } }, { status: 400 });
   }
 
   // Validate URL
   try {
     new URL(url);
   } catch {
-    return NextResponse.json(
-      { error: { code: "INVALID_URL", message: "Invalid webhook URL" } },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: { code: "INVALID_URL", message: "Invalid webhook URL" } }, { status: 400 });
   }
 
   if (!events || !Array.isArray(events) || events.length === 0) {

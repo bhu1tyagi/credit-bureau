@@ -25,7 +25,7 @@ export default function AppFooter() {
 
         {/* Center / Right: Links */}
         <nav className="flex items-center gap-6">
-          {FOOTER_LINKS.map((link) =>
+          {FOOTER_LINKS.map(link =>
             link.external ? (
               <a
                 key={link.label}
@@ -44,7 +44,7 @@ export default function AppFooter() {
               >
                 {link.label}
               </Link>
-            )
+            ),
           )}
         </nav>
       </div>

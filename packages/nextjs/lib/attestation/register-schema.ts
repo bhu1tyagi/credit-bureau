@@ -2,10 +2,9 @@
  * EAS Schema Auto-Registration Utility
  * Registers the credit score schema on-chain if no UID is pre-configured for the target chain.
  */
-
 import { SchemaRegistry } from "@ethereum-attestation-service/eas-sdk";
 import { ethers } from "ethers";
-import { SCHEMA_REGISTRY_ADDRESSES, CREDIT_SCORE_SCHEMA } from "~~/lib/constants";
+import { CREDIT_SCORE_SCHEMA, SCHEMA_REGISTRY_ADDRESSES } from "~~/lib/constants";
 
 // In-memory cache of registered schema UIDs keyed by chain name.
 const schemaUidCache: Record<string, string> = {};

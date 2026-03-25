@@ -31,8 +31,7 @@ function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
     requestAnimationFrame(tick);
   }, [isInView, value]);
 
-  const text =
-    displayed >= 1000 ? `${displayed.toLocaleString()}${suffix}` : `${displayed}${suffix}`;
+  const text = displayed >= 1000 ? `${displayed.toLocaleString()}${suffix}` : `${displayed}${suffix}`;
 
   return (
     <span ref={ref} className="font-mono text-3xl font-bold text-white sm:text-4xl">

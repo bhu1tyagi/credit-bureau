@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
-import { useAccount } from "wagmi";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Shield, Globe, ArrowRight, Code, BarChart3, Wallet } from "lucide-react";
-import { staggerContainer, staggerItem, slideInFromBottom } from "~~/lib/animations";
+import { motion } from "framer-motion";
+import { ArrowRight, BarChart3, Code, Globe, Shield, Wallet } from "lucide-react";
+import { slideInFromBottom, staggerContainer, staggerItem } from "~~/lib/animations";
 
 // ============================================
 // Landing Page
@@ -34,7 +33,6 @@ export default dynamic(() => Promise.resolve(LandingPageContent), { ssr: false }
 // ============================================
 
 function HeroSection() {
-  const { isConnected } = useAccount();
   const router = useRouter();
 
   return (
@@ -63,8 +61,8 @@ function HeroSection() {
           </h1>
 
           <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-            Portable, composable credit identity for the on-chain economy.
-            Score your wallet. Mint your passport. Unlock undercollateralized lending.
+            Portable, composable credit identity for the on-chain economy. Score your wallet. Mint your passport. Unlock
+            undercollateralized lending.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -109,7 +107,11 @@ function StatsBar() {
     { label: "Wallets Scored", value: dynamicStats ? dynamicStats.walletsScored.toLocaleString() : "—", icon: Wallet },
     { label: "Chains Supported", value: "5", icon: Globe },
     { label: "Score Range", value: "300–850", icon: BarChart3 },
-    { label: "Attestations Created", value: dynamicStats ? dynamicStats.attestationsCreated.toLocaleString() : "—", icon: Shield },
+    {
+      label: "Attestations Created",
+      value: dynamicStats ? dynamicStats.attestationsCreated.toLocaleString() : "—",
+      icon: Shield,
+    },
   ];
 
   return (
@@ -121,7 +123,7 @@ function StatsBar() {
         whileInView="animate"
         viewport={{ once: true }}
       >
-        {stats.map((stat) => (
+        {stats.map(stat => (
           <motion.div key={stat.label} variants={staggerItem} className="text-center">
             <stat.icon className="w-8 h-8 text-blue-400 mx-auto mb-3" />
             <div className="text-3xl font-bold text-white mb-1">{stat.value}</div>
@@ -177,7 +179,7 @@ function HowItWorks() {
           whileInView="animate"
           viewport={{ once: true }}
         >
-          {steps.map((step) => (
+          {steps.map(step => (
             <motion.div
               key={step.number}
               variants={staggerItem}
@@ -232,8 +234,8 @@ const attestation = await cb.attestation.create({
               <span className="text-blue-400">Integrate Credit Scoring</span>
             </h2>
             <p className="text-gray-400 mb-8">
-              Our SDK and REST API make it easy to add credit scoring to any DeFi protocol.
-              Check scores, verify attestations, and receive real-time webhooks.
+              Our SDK and REST API make it easy to add credit scoring to any DeFi protocol. Check scores, verify
+              attestations, and receive real-time webhooks.
             </p>
             <Link
               href="/developers"
@@ -252,9 +254,7 @@ const attestation = await cb.attestation.create({
                 <div className="w-3 h-3 rounded-full bg-green-500" />
                 <span className="text-xs text-gray-500 ml-2">index.ts</span>
               </div>
-              <pre className="p-6 text-sm text-gray-300 overflow-x-auto font-mono leading-relaxed">
-                {codeSnippet}
-              </pre>
+              <pre className="p-6 text-sm text-gray-300 overflow-x-auto font-mono leading-relaxed">{codeSnippet}</pre>
             </div>
           </motion.div>
         </div>
@@ -305,7 +305,7 @@ function WaitlistSection() {
           <input
             type="email"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             placeholder="Enter your email"
             className="flex-1 px-4 py-3 bg-[#1A1F3D] border border-[#2A2F4D] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors"
             required
@@ -322,9 +322,7 @@ function WaitlistSection() {
         {status === "success" && (
           <p className="mt-4 text-emerald-400">You&apos;re on the list! We&apos;ll be in touch.</p>
         )}
-        {status === "error" && (
-          <p className="mt-4 text-red-400">Something went wrong. Please try again.</p>
-        )}
+        {status === "error" && <p className="mt-4 text-red-400">Something went wrong. Please try again.</p>}
       </div>
     </section>
   );
@@ -345,14 +343,18 @@ function Footer() {
           </div>
 
           <div className="flex gap-6 text-sm text-gray-400">
-            <Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link>
-            <Link href="/developers" className="hover:text-white transition-colors">Developers</Link>
-            <Link href="/explorer" className="hover:text-white transition-colors">Explorer</Link>
+            <Link href="/dashboard" className="hover:text-white transition-colors">
+              Dashboard
+            </Link>
+            <Link href="/developers" className="hover:text-white transition-colors">
+              Developers
+            </Link>
+            <Link href="/explorer" className="hover:text-white transition-colors">
+              Explorer
+            </Link>
           </div>
 
-          <div className="text-sm text-gray-500">
-            Built on Scaffold-ETH 2
-          </div>
+          <div className="text-sm text-gray-500">Built on Scaffold-ETH 2</div>
         </div>
       </div>
     </footer>

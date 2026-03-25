@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { aggregateWalletData } from "~~/lib/data/aggregator";
-import { computeCreditScore, type OffChainData } from "~~/lib/scoring/deterministic";
-import { getMLPrediction, blendScores } from "~~/lib/scoring/ml-client";
-import { getCredScore } from "~~/lib/data/cred-protocol";
-import { createServerClient } from "~~/lib/supabase/server";
 import { isAddress } from "viem";
+import { aggregateWalletData } from "~~/lib/data/aggregator";
+import { getCredScore } from "~~/lib/data/cred-protocol";
+import { type OffChainData, computeCreditScore } from "~~/lib/scoring/deterministic";
+import { blendScores, getMLPrediction } from "~~/lib/scoring/ml-client";
+import { createServerClient } from "~~/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   let body: { address?: string; chains?: string[]; includeOffChain?: boolean };
@@ -12,10 +12,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: { code: "INVALID_BODY", message: "Invalid JSON body" } },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: { code: "INVALID_BODY", message: "Invalid JSON body" } }, { status: 400 });
   }
 
   const { address, chains = ["eth-mainnet", "base-mainnet", "arbitrum-mainnet"], includeOffChain = false } = body;

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "~~/lib/supabase/server";
 import { isAddress } from "viem";
+import { createServerClient } from "~~/lib/supabase/server";
 
 export async function GET(request: NextRequest) {
   const address = request.nextUrl.searchParams.get("address");
@@ -28,10 +28,7 @@ export async function GET(request: NextRequest) {
         .select("*")
         .eq("user_address", address.toLowerCase())
         .order("created_at", { ascending: false }),
-      supabase
-        .from("offchain_verifications")
-        .select("*")
-        .eq("user_address", address.toLowerCase()),
+      supabase.from("offchain_verifications").select("*").eq("user_address", address.toLowerCase()),
     ]);
 
     const scores = scoresResult.status === "fulfilled" ? scoresResult.value.data || [] : [];

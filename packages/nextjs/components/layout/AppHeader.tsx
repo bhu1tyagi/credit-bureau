@@ -32,15 +32,13 @@ export default function AppHeader() {
             </div>
             <span className="text-lg font-bold text-white tracking-tight">
               Cred
-              <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">
-                Bureau
-              </span>
+              <span className="bg-gradient-to-r from-blue-500 to-cyan-500 bg-clip-text text-transparent">Bureau</span>
             </span>
           </Link>
 
           {/* Desktop nav */}
           <nav className="hidden lg:flex items-center gap-1">
-            {NAV_LINKS.map((link) => {
+            {NAV_LINKS.map(link => {
               const isActive = pathname === link.href;
               return (
                 <Link
@@ -48,9 +46,7 @@ export default function AppHeader() {
                   href={link.href}
                   className={cn(
                     "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-[#1A1F3D] text-white"
-                      : "text-gray-400 hover:text-white hover:bg-[#111631]"
+                    isActive ? "bg-[#1A1F3D] text-white" : "text-gray-400 hover:text-white hover:bg-[#111631]",
                   )}
                 >
                   {link.label}
@@ -84,12 +80,9 @@ export default function AppHeader() {
 
       {/* Mobile nav */}
       {mobileOpen && (
-        <div
-          ref={menuRef}
-          className="border-t border-[#2A2F4D] bg-[#0A0E27] px-4 py-3 lg:hidden"
-        >
+        <div ref={menuRef} className="border-t border-[#2A2F4D] bg-[#0A0E27] px-4 py-3 lg:hidden">
           <nav className="flex flex-col gap-1">
-            {NAV_LINKS.map((link) => {
+            {NAV_LINKS.map(link => {
               const isActive = pathname === link.href;
               return (
                 <Link
@@ -98,9 +91,7 @@ export default function AppHeader() {
                   onClick={() => setMobileOpen(false)}
                   className={cn(
                     "rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                    isActive
-                      ? "bg-[#1A1F3D] text-white"
-                      : "text-gray-400 hover:text-white hover:bg-[#111631]"
+                    isActive ? "bg-[#1A1F3D] text-white" : "text-gray-400 hover:text-white hover:bg-[#111631]",
                   )}
                 >
                   {link.label}

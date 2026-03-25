@@ -1,28 +1,28 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { useAccount } from "wagmi";
-import toast from "react-hot-toast";
 import {
-  Settings,
-  Wallet,
-  Bell,
-  Shield,
-  Key,
-  Download,
-  User,
-  Loader2,
-  Copy,
   AlertTriangle,
-  Trash2,
+  Bell,
   Check,
+  Copy,
+  Download,
+  Key,
+  Loader2,
+  Settings,
+  Shield,
+  Trash2,
+  User,
+  Wallet,
   X,
 } from "lucide-react";
-import { truncateAddress } from "~~/lib/utils";
-import { getSupabaseClient } from "~~/lib/supabase/client";
+import toast from "react-hot-toast";
+import { useAccount } from "wagmi";
 import { useLinkedWallets } from "~~/hooks/useLinkedWallets";
+import { getSupabaseClient } from "~~/lib/supabase/client";
+import { truncateAddress } from "~~/lib/utils";
 
 const TABS = ["Profile", "Wallets", "Notifications", "Privacy", "API Keys", "Export"] as const;
 type Tab = (typeof TABS)[number];
@@ -49,12 +49,7 @@ const CHAIN_COLORS: Record<string, string> = {
 // ---------------------------------------------------------------------------
 // Notification preference keys
 // ---------------------------------------------------------------------------
-const NOTIFICATION_KEYS = [
-  "score_changes",
-  "attestation_expiry",
-  "liquidation_alerts",
-  "weekly_report",
-] as const;
+const NOTIFICATION_KEYS = ["score_changes", "attestation_expiry", "liquidation_alerts", "weekly_report"] as const;
 
 const NOTIFICATION_LABELS: Record<string, string> = {
   score_changes: "Score changes",
@@ -189,7 +184,7 @@ function SettingsPage() {
     setSavingProfile(true);
     try {
       const supabase = getSupabaseClient();
-      await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      await (supabase as any)
         .from("user_profiles")
         .upsert({ wallet_address: address.toLowerCase(), email }, { onConflict: "wallet_address" });
       toast.success("Profile saved!");
@@ -264,11 +259,11 @@ function SettingsPage() {
       const addr = address.toLowerCase();
       // Delete across all relevant tables
       await Promise.allSettled([
-        (supabase as any).from("credit_scores").delete().eq("wallet_address", addr), // eslint-disable-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("attestations").delete().eq("user_address", addr), // eslint-disable-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("offchain_verifications").delete().eq("user_address", addr), // eslint-disable-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("linked_wallets").delete().eq("user_id", addr), // eslint-disable-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("user_profiles").delete().eq("wallet_address", addr), // eslint-disable-line @typescript-eslint/no-explicit-any
+        (supabase as any).from("credit_scores").delete().eq("wallet_address", addr),
+        (supabase as any).from("attestations").delete().eq("user_address", addr),
+        (supabase as any).from("offchain_verifications").delete().eq("user_address", addr),
+        (supabase as any).from("linked_wallets").delete().eq("user_id", addr),
+        (supabase as any).from("user_profiles").delete().eq("wallet_address", addr),
       ]);
       toast.success("All your data has been deleted.");
       router.push("/");
@@ -546,10 +541,7 @@ function SettingsPage() {
                   {NOTIFICATION_KEYS.map(key => (
                     <div key={key} className="flex items-center justify-between">
                       <span className="text-sm text-white">{NOTIFICATION_LABELS[key]}</span>
-                      <ToggleSwitch
-                        checked={!!notifState[key]}
-                        onChange={v => handleNotifToggle(key, v)}
-                      />
+                      <ToggleSwitch checked={!!notifState[key]} onChange={v => handleNotifToggle(key, v)} />
                     </div>
                   ))}
                 </div>

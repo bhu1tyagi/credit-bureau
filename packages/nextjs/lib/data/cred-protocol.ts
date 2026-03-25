@@ -26,16 +26,13 @@ export async function getCredScore(address: string): Promise<CredScore | null> {
   if (!CRED_API_KEY) return null;
 
   try {
-    const response = await fetch(
-      `${CRED_BASE_URL}/score/address/${address}?include_factors=true`,
-      {
-        headers: {
-          Authorization: `Bearer ${CRED_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        signal: AbortSignal.timeout(10000),
+    const response = await fetch(`${CRED_BASE_URL}/score/address/${address}?include_factors=true`, {
+      headers: {
+        Authorization: `Bearer ${CRED_API_KEY}`,
+        "Content-Type": "application/json",
       },
-    );
+      signal: AbortSignal.timeout(10000),
+    });
 
     if (!response.ok) return null;
 

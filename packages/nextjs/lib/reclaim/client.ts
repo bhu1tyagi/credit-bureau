@@ -2,8 +2,7 @@
  * Reclaim Protocol Integration
  * Privacy-preserving off-chain data verification via zkTLS.
  */
-
-import { ReclaimProofRequest, verifyProof as reclaimVerifyProof, type Proof } from "@reclaimprotocol/js-sdk";
+import { type Proof, ReclaimProofRequest, verifyProof as reclaimVerifyProof } from "@reclaimprotocol/js-sdk";
 
 export type { Proof };
 

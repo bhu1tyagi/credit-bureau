@@ -1,44 +1,44 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useAccount } from "wagmi";
-import { motion } from "framer-motion";
+import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
-import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
+import { type Variants, motion } from "framer-motion";
 import {
-  Shield,
-  Clock,
   Activity,
-  Layers,
-  DollarSign,
   AlertTriangle,
+  ArrowRight,
+  Clock,
   Coins,
+  DollarSign,
+  Layers,
+  Link2,
+  RefreshCw,
+  Shield,
+  Sparkles,
   TrendingUp,
   Wallet,
-  ArrowRight,
-  RefreshCw,
-  Sparkles,
-  Link2,
 } from "lucide-react";
-import { useCreditScore } from "~~/hooks/useCreditScore";
-import { useScoreHistory } from "~~/hooks/useScoreHistory";
-import { useAttestation } from "~~/hooks/useAttestation";
-import { useLinkedWallets } from "~~/hooks/useLinkedWallets";
-import ScoreHistoryChart from "~~/components/credit/ScoreHistoryChart";
+import toast from "react-hot-toast";
+import { useAccount } from "wagmi";
 import AttestationSection from "~~/components/credit/AttestationSection";
-import LinkedWalletsPanel from "~~/components/credit/LinkedWalletsPanel";
 import ImprovementTips from "~~/components/credit/ImprovementTips";
+import LinkedWalletsPanel from "~~/components/credit/LinkedWalletsPanel";
 import PercentileRanking from "~~/components/credit/PercentileRanking";
+import ScoreHistoryChart from "~~/components/credit/ScoreHistoryChart";
+import { useAttestation } from "~~/hooks/useAttestation";
+import { useCreditScore } from "~~/hooks/useCreditScore";
+import { useLinkedWallets } from "~~/hooks/useLinkedWallets";
+import { useScoreHistory } from "~~/hooks/useScoreHistory";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
-import { RISK_TIER_COLORS, type ScoreFactor, type RiskTier, type Attestation } from "~~/types/credit";
-import { truncateAddress, timeAgo } from "~~/lib/utils";
+import { timeAgo, truncateAddress } from "~~/lib/utils";
+import { type Attestation, RISK_TIER_COLORS, type RiskTier, type ScoreFactor } from "~~/types/credit";
 
 // ============================================
 // Section animation wrapper
 // ============================================
 
-const sectionVariants = {
+const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 30 },
   visible: (i: number) => ({
     opacity: 1,
@@ -86,9 +86,7 @@ function ConnectWalletPrompt() {
         <p className="text-gray-400 mb-8">
           Connect your wallet to view your DeFi credit score and mint your Credit Passport.
         </p>
-        <p className="text-sm text-gray-500">
-          Use the connect button in the header to get started.
-        </p>
+        <p className="text-sm text-gray-500">Use the connect button in the header to get started.</p>
       </motion.div>
     </div>
   );
@@ -133,10 +131,7 @@ function DashboardContent({ address }: { address: string }) {
       const result = await attestation.mint(address, chain);
 
       if (result) {
-        toast.success(
-          `Credit Passport minted on ${chain}!`,
-          { id: "mint", duration: 5000 },
-        );
+        toast.success(`Credit Passport minted on ${chain}!`, { id: "mint", duration: 5000 });
 
         // Fire confetti celebration
         confetti({
@@ -161,7 +156,7 @@ function DashboardContent({ address }: { address: string }) {
           createdAt: Date.now(),
           easScanUrl: result.easScanUrl,
         };
-        setAttestations((prev) => [newAttestation, ...prev]);
+        setAttestations(prev => [newAttestation, ...prev]);
       } else {
         toast.error(attestation.error || "Failed to mint attestation", {
           id: "mint",
@@ -243,16 +238,10 @@ function DashboardContent({ address }: { address: string }) {
       />
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
-
         {/* =============================================
             Section 1: Header + Score Overview
         ============================================= */}
-        <motion.section
-          custom={0}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <motion.section custom={0} variants={sectionVariants} initial="hidden" animate="visible">
           {/* Header */}
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -342,13 +331,7 @@ function DashboardContent({ address }: { address: string }) {
         {/* =============================================
             Section 2: Score Breakdown
         ============================================= */}
-        <motion.section
-          custom={1}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-          className="mb-10"
-        >
+        <motion.section custom={1} variants={sectionVariants} initial="hidden" animate="visible" className="mb-10">
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Activity className="w-5 h-5 text-blue-400" />
             Score Breakdown
@@ -360,29 +343,55 @@ function DashboardContent({ address }: { address: string }) {
             animate="animate"
           >
             <BreakdownCard name="Wallet Age" factor={score.breakdown.walletAge} icon={<Clock className="w-5 h-5" />} />
-            <BreakdownCard name="Tx Frequency" factor={score.breakdown.txFrequency} icon={<Activity className="w-5 h-5" />} />
-            <BreakdownCard name="DeFi Diversity" factor={score.breakdown.defiDiversity} icon={<Layers className="w-5 h-5" />} />
-            <BreakdownCard name="Repayment History" factor={score.breakdown.repaymentHistory} icon={<DollarSign className="w-5 h-5" />} />
-            <BreakdownCard name="Liquidation Risk" factor={score.breakdown.liquidationPenalty} icon={<AlertTriangle className="w-5 h-5" />} isNegative />
-            <BreakdownCard name="Stablecoin Ratio" factor={score.breakdown.stablecoinRatio} icon={<Coins className="w-5 h-5" />} />
-            <BreakdownCard name="Portfolio Value" factor={score.breakdown.totalValue} icon={<DollarSign className="w-5 h-5" />} />
-            <BreakdownCard name="Off-Chain Bonus" factor={score.breakdown.offChainBonus} icon={<Shield className="w-5 h-5" />} />
+            <BreakdownCard
+              name="Tx Frequency"
+              factor={score.breakdown.txFrequency}
+              icon={<Activity className="w-5 h-5" />}
+            />
+            <BreakdownCard
+              name="DeFi Diversity"
+              factor={score.breakdown.defiDiversity}
+              icon={<Layers className="w-5 h-5" />}
+            />
+            <BreakdownCard
+              name="Repayment History"
+              factor={score.breakdown.repaymentHistory}
+              icon={<DollarSign className="w-5 h-5" />}
+            />
+            <BreakdownCard
+              name="Liquidation Risk"
+              factor={score.breakdown.liquidationPenalty}
+              icon={<AlertTriangle className="w-5 h-5" />}
+              isNegative
+            />
+            <BreakdownCard
+              name="Stablecoin Ratio"
+              factor={score.breakdown.stablecoinRatio}
+              icon={<Coins className="w-5 h-5" />}
+            />
+            <BreakdownCard
+              name="Portfolio Value"
+              factor={score.breakdown.totalValue}
+              icon={<DollarSign className="w-5 h-5" />}
+            />
+            <BreakdownCard
+              name="Off-Chain Bonus"
+              factor={score.breakdown.offChainBonus}
+              icon={<Shield className="w-5 h-5" />}
+            />
           </motion.div>
         </motion.section>
 
         {/* =============================================
             Section 3: Score History Chart + Percentile
         ============================================= */}
-        <motion.section
-          custom={2}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-          className="mb-10"
-        >
+        <motion.section custom={2} variants={sectionVariants} initial="hidden" animate="visible" className="mb-10">
           <div className="grid lg:grid-cols-3 gap-6">
             {/* Score History Chart */}
-            <div className="lg:col-span-2 rounded-2xl bg-[#1A1F3D]/50 border border-[#2A2F4D] backdrop-blur-sm p-6" style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}>
+            <div
+              className="lg:col-span-2 rounded-2xl bg-[#1A1F3D]/50 border border-[#2A2F4D] backdrop-blur-sm p-6"
+              style={{ boxShadow: "inset 0 1px 0 rgba(255,255,255,0.05)" }}
+            >
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-blue-400" />
                 <h2 className="text-lg font-semibold text-white">Score History</h2>
@@ -393,7 +402,7 @@ function DashboardContent({ address }: { address: string }) {
                 </div>
               ) : history.length > 0 ? (
                 <ScoreHistoryChart
-                  data={history.map((h) => ({ score: h.score, timestamp: h.timestamp }))}
+                  data={history.map(h => ({ score: h.score, timestamp: h.timestamp }))}
                   timeRange="Last 90 days"
                 />
               ) : (
@@ -415,34 +424,18 @@ function DashboardContent({ address }: { address: string }) {
         {/* =============================================
             Section 4: Mint Credit Passport (Inline)
         ============================================= */}
-        <motion.section
-          custom={3}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-          className="mb-10"
-        >
+        <motion.section custom={3} variants={sectionVariants} initial="hidden" animate="visible" className="mb-10">
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Shield className="w-5 h-5 text-blue-400" />
             Credit Passport
           </h2>
-          <AttestationSection
-            attestations={attestations}
-            onMint={handleMint}
-            isMinting={attestation.isMinting}
-          />
+          <AttestationSection attestations={attestations} onMint={handleMint} isMinting={attestation.isMinting} />
         </motion.section>
 
         {/* =============================================
             Section 5: Linked Wallets (Inline)
         ============================================= */}
-        <motion.section
-          custom={4}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-          className="mb-10"
-        >
+        <motion.section custom={4} variants={sectionVariants} initial="hidden" animate="visible" className="mb-10">
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Link2 className="w-5 h-5 text-blue-400" />
             Linked Wallets
@@ -466,7 +459,7 @@ function DashboardContent({ address }: { address: string }) {
                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                onClick={(e) => e.stopPropagation()}
+                onClick={e => e.stopPropagation()}
               >
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Wallet className="w-5 h-5 text-blue-400" />
@@ -478,7 +471,7 @@ function DashboardContent({ address }: { address: string }) {
                     <input
                       type="text"
                       value={linkAddress}
-                      onChange={(e) => setLinkAddress(e.target.value)}
+                      onChange={e => setLinkAddress(e.target.value)}
                       placeholder="0x..."
                       className="w-full rounded-lg border border-[#2A2F4D] bg-[#0A0E27] px-4 py-2.5 text-sm text-white placeholder-gray-600 focus:border-blue-500/50 focus:outline-none transition-colors"
                     />
@@ -487,7 +480,7 @@ function DashboardContent({ address }: { address: string }) {
                     <label className="block text-xs text-gray-400 mb-1.5">Chain</label>
                     <select
                       value={linkChain}
-                      onChange={(e) => setLinkChain(e.target.value)}
+                      onChange={e => setLinkChain(e.target.value)}
                       className="w-full rounded-lg border border-[#2A2F4D] bg-[#0A0E27] px-4 py-2.5 text-sm text-white focus:border-blue-500/50 focus:outline-none transition-colors appearance-none"
                     >
                       <option value="ethereum">Ethereum</option>
@@ -521,13 +514,7 @@ function DashboardContent({ address }: { address: string }) {
         {/* =============================================
             Section 6: Improvement Tips
         ============================================= */}
-        <motion.section
-          custom={5}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-          className="mb-10"
-        >
+        <motion.section custom={5} variants={sectionVariants} initial="hidden" animate="visible" className="mb-10">
           <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-amber-400" />
             Improvement Tips
@@ -538,17 +525,13 @@ function DashboardContent({ address }: { address: string }) {
         {/* =============================================
             Quick Actions Footer
         ============================================= */}
-        <motion.section
-          custom={6}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-          className="mb-8"
-        >
+        <motion.section custom={6} variants={sectionVariants} initial="hidden" animate="visible" className="mb-8">
           <div className="rounded-2xl bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border border-[#2A2F4D] backdrop-blur-sm p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div>
               <h3 className="text-white font-semibold mb-1">Want a detailed breakdown?</h3>
-              <p className="text-gray-400 text-sm">View your full credit report with lending history and risk factors.</p>
+              <p className="text-gray-400 text-sm">
+                View your full credit report with lending history and risk factors.
+              </p>
             </div>
             <a
               href="/report"
@@ -646,10 +629,7 @@ function SummaryCard({
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
     >
       <div className="flex items-center gap-2 mb-2">
-        <div
-          className="p-1.5 rounded-lg"
-          style={{ color, backgroundColor: `${color}15` }}
-        >
+        <div className="p-1.5 rounded-lg" style={{ color, backgroundColor: `${color}15` }}>
           {icon}
         </div>
         <span className="text-xs text-gray-400 uppercase tracking-wider">{label}</span>
@@ -717,7 +697,9 @@ function BreakdownCard({
           {factor.score} / {factor.maxScore}
         </span>
         {factor.trend && (
-          <span className={`text-xs ${factor.trend === "up" ? "text-emerald-400" : factor.trend === "down" ? "text-red-400" : "text-gray-500"}`}>
+          <span
+            className={`text-xs ${factor.trend === "up" ? "text-emerald-400" : factor.trend === "down" ? "text-red-400" : "text-gray-500"}`}
+          >
             {factor.trend === "up" ? "Trending up" : factor.trend === "down" ? "Trending down" : "Stable"}
           </span>
         )}

@@ -3,11 +3,10 @@
  * Orchestrates all data fetchers in parallel via Promise.allSettled.
  * Normalizes results into a unified WalletProfile.
  */
-
-import type { WalletProfile } from "~~/types/credit";
 import { getWalletDataMultiChain } from "./goldrush";
 import { getAaveDataMultiChain } from "./thegraph";
 import { SUPPORTED_CHAINS } from "~~/lib/constants";
+import type { WalletProfile } from "~~/types/credit";
 
 const DEFAULT_CHAINS = SUPPORTED_CHAINS.map(c => c.name);
 
@@ -22,10 +21,7 @@ interface AggregatedData {
  * Fetch and aggregate all on-chain data for a wallet address.
  * Uses Promise.allSettled so no single source failure blocks the result.
  */
-export async function aggregateWalletData(
-  address: string,
-  chains: string[] = DEFAULT_CHAINS,
-): Promise<AggregatedData> {
+export async function aggregateWalletData(address: string, chains: string[] = DEFAULT_CHAINS): Promise<AggregatedData> {
   const dataSources: string[] = [];
   const failedSources: string[] = [];
 
@@ -80,9 +76,7 @@ export async function aggregateWalletData(
   }
 
   // Compute wallet age from the real first-transaction date
-  const walletAgeDays = firstTxDate
-    ? Math.floor((Date.now() - new Date(firstTxDate).getTime()) / 86400000)
-    : 0;
+  const walletAgeDays = firstTxDate ? Math.floor((Date.now() - new Date(firstTxDate).getTime()) / 86400000) : 0;
 
   // Derive unique active months from wallet age
   const uniqueActiveMonths = Math.min(Math.floor(walletAgeDays / 30), 60);

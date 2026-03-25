@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ethers } from "ethers";
-import { createCreditScoreAttestation, computeDataHash, riskTierToUint8 } from "~~/lib/attestation/eas";
-import { createServerClient } from "~~/lib/supabase/server";
 import { isAddress } from "viem";
+import { computeDataHash, createCreditScoreAttestation, riskTierToUint8 } from "~~/lib/attestation/eas";
+import { createServerClient } from "~~/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
   let body: { address?: string; chain?: string };
@@ -10,10 +10,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: { code: "INVALID_BODY", message: "Invalid JSON body" } },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: { code: "INVALID_BODY", message: "Invalid JSON body" } }, { status: 400 });
   }
 
   const { address, chain = "base-sepolia" } = body;
@@ -27,10 +24,7 @@ export async function POST(request: NextRequest) {
 
   const privateKey = process.env.EAS_ATTESTER_PRIVATE_KEY;
   if (!privateKey) {
-    return NextResponse.json(
-      { error: { code: "CONFIG_ERROR", message: "Attester not configured" } },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: { code: "CONFIG_ERROR", message: "Attester not configured" } }, { status: 500 });
   }
 
   try {

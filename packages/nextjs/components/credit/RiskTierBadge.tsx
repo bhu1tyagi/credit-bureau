@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { cn } from "~~/lib/utils";
 import type { RiskTier } from "~~/types/credit";
 import { RISK_TIER_COLORS } from "~~/types/credit";
-import { cn } from "~~/lib/utils";
 
 interface RiskTierBadgeProps {
   tier: RiskTier;
@@ -22,10 +22,7 @@ export default function RiskTierBadge({ tier, size = "md" }: RiskTierBadgeProps)
 
   return (
     <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full font-semibold",
-        SIZE_CLASSES[size]
-      )}
+      className={cn("inline-flex items-center gap-1.5 rounded-full font-semibold", SIZE_CLASSES[size])}
       style={{
         backgroundColor: `${color}20`,
         color: color,

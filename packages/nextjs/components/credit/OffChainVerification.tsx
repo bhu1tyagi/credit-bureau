@@ -1,9 +1,9 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ShieldCheck, ShieldX, CreditCard, Landmark, DollarSign, UserCheck } from "lucide-react";
-import { cn } from "~~/lib/utils";
+import { CreditCard, DollarSign, Landmark, ShieldCheck, ShieldX, UserCheck } from "lucide-react";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
+import { cn } from "~~/lib/utils";
 
 interface Verification {
   type: string;
@@ -52,7 +52,7 @@ export default function OffChainVerification({ verifications, onVerify }: OffCha
         initial="initial"
         animate="animate"
       >
-        {verifications.map((v) => {
+        {verifications.map(v => {
           const meta = PROVIDER_META[v.type] ?? {
             label: v.type,
             icon: <ShieldCheck className="w-6 h-6" />,
@@ -67,14 +67,14 @@ export default function OffChainVerification({ verifications, onVerify }: OffCha
                 "rounded-lg border p-4 transition-colors",
                 v.verified
                   ? "border-emerald-500/30 bg-emerald-500/5"
-                  : "border-[#2A2F4D] bg-[#111631]/80 hover:border-cyan-500/20"
+                  : "border-[#2A2F4D] bg-[#111631]/80 hover:border-cyan-500/20",
               )}
             >
               <div className="flex items-start justify-between mb-3">
                 <div
                   className={cn(
                     "rounded-lg p-2",
-                    v.verified ? "bg-emerald-500/10 text-emerald-400" : "bg-[#2A2F4D] text-gray-400"
+                    v.verified ? "bg-emerald-500/10 text-emerald-400" : "bg-[#2A2F4D] text-gray-400",
                   )}
                 >
                   {meta.icon}

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, CheckCircle, Loader2, Mail } from "lucide-react";
 
 export default function WaitlistCTA() {
   const [email, setEmail] = useState("");
@@ -45,9 +45,7 @@ export default function WaitlistCTA() {
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-500/10">
           <Mail className="w-6 h-6 text-blue-400" />
         </div>
-        <h2 className="mb-3 text-3xl font-bold text-white">
-          Get Early Access
-        </h2>
+        <h2 className="mb-3 text-3xl font-bold text-white">Get Early Access</h2>
         <p className="mb-8 text-gray-400">
           Join the waitlist to be among the first to build your on-chain credit identity.
         </p>
@@ -57,7 +55,7 @@ export default function WaitlistCTA() {
             type="email"
             placeholder="you@example.com"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={e => setEmail(e.target.value)}
             required
             className="w-full flex-1 rounded-xl border border-[#2A2F4D] bg-[#111631] px-4 py-3 text-sm text-white placeholder-gray-500 outline-none focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/20 transition-colors"
           />

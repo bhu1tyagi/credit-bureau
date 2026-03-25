@@ -127,17 +127,17 @@
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-mono), "JetBrains Mono", monospace;
 
-  --cb-bg: #0A0E27;
+  --cb-bg: #0a0e27;
   --cb-surface: #111631;
-  --cb-card: #1A1F3D;
-  --cb-border: #2A2F4D;
-  --cb-primary: #3B82F6;
-  --cb-secondary: #06B6D4;
-  --cb-excellent: #10B981;
-  --cb-good: #3B82F6;
-  --cb-fair: #F59E0B;
-  --cb-poor: #F97316;
-  --cb-very-poor: #EF4444;
+  --cb-card: #1a1f3d;
+  --cb-border: #2a2f4d;
+  --cb-primary: #3b82f6;
+  --cb-secondary: #06b6d4;
+  --cb-excellent: #10b981;
+  --cb-good: #3b82f6;
+  --cb-fair: #f59e0b;
+  --cb-poor: #f97316;
+  --cb-very-poor: #ef4444;
 }
 
 .font-sans {
@@ -147,4 +147,3 @@
 .font-mono {
   font-family: var(--font-mono);
 }
-

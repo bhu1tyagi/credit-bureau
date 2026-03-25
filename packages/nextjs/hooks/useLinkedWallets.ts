@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import type { LinkedWallet } from "~~/types/credit";
+import { useCallback, useEffect, useState } from "react";
 import { getSupabaseClient } from "~~/lib/supabase/client";
+import type { LinkedWallet } from "~~/types/credit";
 
 interface UseLinkedWalletsResult {
   wallets: LinkedWallet[];
@@ -26,13 +26,10 @@ export function useLinkedWallets(primaryAddress?: string): UseLinkedWalletsResul
 
     try {
       const supabase = getSupabaseClient();
-      const { data } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-        .from("linked_wallets")
-        .select("*")
-        .eq("user_id", primaryAddress);
+      const { data } = await (supabase as any).from("linked_wallets").select("*").eq("user_id", primaryAddress);
 
       setWallets(
-        ((data || []) as any[]).map((w: any) => ({ // eslint-disable-line @typescript-eslint/no-explicit-any
+        ((data || []) as any[]).map((w: any) => ({
           id: w.id,
           address: w.wallet_address,
           chain: w.chain,
@@ -56,7 +53,7 @@ export function useLinkedWallets(primaryAddress?: string): UseLinkedWalletsResul
       setIsLinking(true);
       try {
         const supabase = getSupabaseClient();
-        await (supabase as any).from("linked_wallets").insert({ // eslint-disable-line @typescript-eslint/no-explicit-any
+        await (supabase as any).from("linked_wallets").insert({
           user_id: primaryAddress,
           wallet_address: address,
           chain,
@@ -73,7 +70,7 @@ export function useLinkedWallets(primaryAddress?: string): UseLinkedWalletsResul
     async (address: string) => {
       try {
         const supabase = getSupabaseClient();
-        await (supabase as any).from("linked_wallets").delete().eq("wallet_address", address); // eslint-disable-line @typescript-eslint/no-explicit-any
+        await (supabase as any).from("linked_wallets").delete().eq("wallet_address", address);
         await fetchWallets();
       } catch {
         // Silent failure

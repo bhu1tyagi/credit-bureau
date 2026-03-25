@@ -22,7 +22,7 @@ export default function ChainSelector({ chains, selected, onChange }: ChainSelec
 
   return (
     <div className="flex items-center gap-1 rounded-lg border border-[#2A2F4D] bg-[#111631] p-1">
-      {allChains.map((chain) => {
+      {allChains.map(chain => {
         const isSelected = chain === selected;
         const label = chain === "all" ? "All Chains" : chain.charAt(0).toUpperCase() + chain.slice(1);
         const icon = CHAIN_ICONS[chain.toLowerCase()] ?? chain.charAt(0).toUpperCase();
@@ -35,7 +35,7 @@ export default function ChainSelector({ chains, selected, onChange }: ChainSelec
               "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium transition-all",
               isSelected
                 ? "bg-[#1A1F3D] text-white shadow-sm border border-[#2A2F4D]"
-                : "text-gray-500 hover:text-gray-300"
+                : "text-gray-500 hover:text-gray-300",
             )}
           >
             <span className="text-sm">{icon}</span>

@@ -1,10 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
-import type { ScoreFactor } from "~~/types/credit";
-import { cn } from "~~/lib/utils";
+import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { staggerItem } from "~~/lib/animations";
+import { cn } from "~~/lib/utils";
+import type { ScoreFactor } from "~~/types/credit";
 
 interface ScoreBreakdownCardProps {
   factor: ScoreFactor;
@@ -34,7 +34,7 @@ export default function ScoreBreakdownCard({ factor, name, icon }: ScoreBreakdow
       whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(59, 130, 246, 0.15)" }}
       className={cn(
         "rounded-xl border border-[#2A2F4D] bg-[#1A1F3D]/50 backdrop-blur-sm",
-        "p-5 transition-colors hover:border-[#3B82F6]/30"
+        "p-5 transition-colors hover:border-[#3B82F6]/30",
       )}
     >
       {/* Header */}
@@ -43,9 +43,7 @@ export default function ScoreBreakdownCard({ factor, name, icon }: ScoreBreakdow
           <div className="text-blue-400">{icon}</div>
           <h3 className="text-sm font-semibold text-white">{name}</h3>
         </div>
-        <span className="rounded-full bg-[#2A2F4D] px-2 py-0.5 text-xs text-gray-400">
-          {weightPercent}% weight
-        </span>
+        <span className="rounded-full bg-[#2A2F4D] px-2 py-0.5 text-xs text-gray-400">{weightPercent}% weight</span>
       </div>
 
       {/* Progress bar */}

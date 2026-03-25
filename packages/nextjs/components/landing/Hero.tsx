@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ArrowRight, Code } from "lucide-react";
 import { fadeIn, slideInFromBottom } from "~~/lib/animations";
 

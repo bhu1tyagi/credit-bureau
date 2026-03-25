@@ -7,10 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: { code: "INVALID_BODY", message: "Invalid JSON body" } },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: { code: "INVALID_BODY", message: "Invalid JSON body" } }, { status: 400 });
   }
 
   const { email, wallet_address } = body;
@@ -24,12 +21,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const supabase = createServerClient();
-    const { error } = await (supabase as any) // eslint-disable-line @typescript-eslint/no-explicit-any
-      .from("waitlist")
-      .insert({
-        email: email.toLowerCase().trim(),
-        wallet_address: wallet_address || null,
-      });
+    const { error } = await (supabase as any).from("waitlist").insert({
+      email: email.toLowerCase().trim(),
+      wallet_address: wallet_address || null,
+    });
 
     if (error) {
       // Unique constraint violation — already on the waitlist

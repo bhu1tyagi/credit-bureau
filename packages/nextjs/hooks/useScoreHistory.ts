@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { ScoreHistoryPoint } from "~~/types/credit";
 
 interface UseScoreHistoryResult {
@@ -30,12 +30,14 @@ export function useScoreHistory(address?: string): UseScoreHistoryResult {
 
         const data = await response.json();
         setHistory(
-          (data.history || []).map((h: { score: number; riskTier: string; timestamp: string; modelVersion: number }) => ({
-            score: h.score,
-            riskTier: h.riskTier,
-            timestamp: new Date(h.timestamp).getTime(),
-            modelVersion: h.modelVersion,
-          })),
+          (data.history || []).map(
+            (h: { score: number; riskTier: string; timestamp: string; modelVersion: number }) => ({
+              score: h.score,
+              riskTier: h.riskTier,
+              timestamp: new Date(h.timestamp).getTime(),
+              modelVersion: h.modelVersion,
+            }),
+          ),
         );
       } catch (error) {
         console.error("[useScoreHistory] Failed to fetch:", error);

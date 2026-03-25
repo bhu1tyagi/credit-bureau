@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
-import { getRiskTier, RISK_TIER_COLORS } from "~~/types/credit";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { RISK_TIER_COLORS, getRiskTier } from "~~/types/credit";
 
 interface ScoreHistoryChartProps {
   data: { score: number; timestamp: number }[];
@@ -47,7 +39,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 }
 
 export default function ScoreHistoryChart({ data, timeRange }: ScoreHistoryChartProps) {
-  const chartData = data.map((d) => ({
+  const chartData = data.map(d => ({
     ...d,
     date: formatDate(d.timestamp),
   }));
@@ -73,12 +65,7 @@ export default function ScoreHistoryChart({ data, timeRange }: ScoreHistoryChart
             axisLine={{ stroke: "#2A2F4D" }}
             tickLine={false}
           />
-          <YAxis
-            domain={[300, 850]}
-            tick={{ fill: "#6B7280", fontSize: 11 }}
-            axisLine={false}
-            tickLine={false}
-          />
+          <YAxis domain={[300, 850]} tick={{ fill: "#6B7280", fontSize: 11 }} axisLine={false} tickLine={false} />
           <Tooltip content={<CustomTooltip />} />
           <Area
             type="monotone"

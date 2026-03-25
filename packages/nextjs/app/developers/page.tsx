@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Code, Terminal, Key, Webhook, Copy, Check, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
-import { staggerContainer, staggerItem } from "~~/lib/animations";
+import { AlertTriangle, Check, Code, Copy, Key, Terminal, Webhook } from "lucide-react";
 import toast from "react-hot-toast";
+import { staggerContainer, staggerItem } from "~~/lib/animations";
 
 const TABS = ["Overview", "API Reference", "SDK", "API Keys"] as const;
-type Tab = typeof TABS[number];
+type Tab = (typeof TABS)[number];
 
 export default function DevelopersPage() {
   const [activeTab, setActiveTab] = useState<Tab>("Overview");
@@ -28,9 +28,7 @@ export default function DevelopersPage() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === tab
-                  ? "bg-blue-500 text-white"
-                  : "text-gray-400 hover:text-white"
+                activeTab === tab ? "bg-blue-500 text-white" : "text-gray-400 hover:text-white"
               }`}
             >
               {tab}
@@ -55,8 +53,16 @@ function OverviewTab() {
         <p className="text-gray-400 mb-4">Get started with credit scoring in under 5 minutes.</p>
         <div className="space-y-4">
           <Step number={1} title="Install the SDK" code="npm install @credbureau/sdk" />
-          <Step number={2} title="Initialize the client" code={`const cb = new CredBureau({ apiKey: 'your_api_key' });`} />
-          <Step number={3} title="Fetch a credit score" code={`const score = await cb.score.get({ address: '0x...' });`} />
+          <Step
+            number={2}
+            title="Initialize the client"
+            code={`const cb = new CredBureau({ apiKey: 'your_api_key' });`}
+          />
+          <Step
+            number={3}
+            title="Fetch a credit score"
+            code={`const score = await cb.score.get({ address: '0x...' });`}
+          />
         </div>
       </motion.div>
 
@@ -84,8 +90,18 @@ function OverviewTab() {
 function ApiReferenceTab() {
   const endpoints = [
     { method: "GET", path: "/api/v1/score", description: "Get credit score for an address", params: "address, chains" },
-    { method: "POST", path: "/api/v1/score/detailed", description: "Get detailed score with full breakdown", params: "address, chains, includeOffChain" },
-    { method: "GET", path: "/api/v1/verify", description: "Verify an EAS attestation", params: "attestationUID, chain" },
+    {
+      method: "POST",
+      path: "/api/v1/score/detailed",
+      description: "Get detailed score with full breakdown",
+      params: "address, chains, includeOffChain",
+    },
+    {
+      method: "GET",
+      path: "/api/v1/verify",
+      description: "Verify an EAS attestation",
+      params: "attestationUID, chain",
+    },
     { method: "GET", path: "/api/v1/history", description: "Get score history", params: "address" },
     { method: "POST", path: "/api/v1/attest", description: "Create EAS attestation", params: "address, chain" },
     { method: "GET", path: "/api/v1/report", description: "Get full credit report", params: "address" },
@@ -98,9 +114,11 @@ function ApiReferenceTab() {
       {endpoints.map(ep => (
         <div key={ep.path} className="p-4 rounded-xl bg-[#1A1F3D]/50 border border-[#2A2F4D]">
           <div className="flex items-center gap-3 mb-2">
-            <span className={`px-2 py-0.5 rounded text-xs font-bold ${
-              ep.method === "GET" ? "bg-emerald-500/20 text-emerald-400" : "bg-blue-500/20 text-blue-400"
-            }`}>
+            <span
+              className={`px-2 py-0.5 rounded text-xs font-bold ${
+                ep.method === "GET" ? "bg-emerald-500/20 text-emerald-400" : "bg-blue-500/20 text-blue-400"
+              }`}
+            >
               {ep.method}
             </span>
             <code className="text-white text-sm font-mono">{ep.path}</code>
@@ -179,9 +197,7 @@ function ApiKeysTab() {
   return (
     <div className="p-6 rounded-xl bg-[#1A1F3D]/50 border border-[#2A2F4D]">
       <h2 className="text-lg font-semibold text-white mb-3">API Keys</h2>
-      <p className="text-gray-400 mb-6">
-        Connect your wallet and create an API key to start making requests.
-      </p>
+      <p className="text-gray-400 mb-6">Connect your wallet and create an API key to start making requests.</p>
 
       {generatedKey ? (
         <div className="p-5 rounded-xl bg-[#0A0E27] border border-emerald-500/30 mb-6">
@@ -202,9 +218,7 @@ function ApiKeysTab() {
           </div>
           <div className="flex items-start gap-2 mb-4">
             <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-            <p className="text-sm text-amber-400">
-              Save this key now. It won&apos;t be shown again.
-            </p>
+            <p className="text-sm text-amber-400">Save this key now. It won&apos;t be shown again.</p>
           </div>
           <button
             onClick={() => {
@@ -245,7 +259,9 @@ function Step({ number, title, code }: { number: number; title: string; code: st
       </div>
       <div className="flex-1">
         <p className="text-white text-sm font-medium mb-1">{title}</p>
-        <code className="text-xs text-gray-400 font-mono bg-[#0A0E27] px-3 py-1.5 rounded block overflow-x-auto">{code}</code>
+        <code className="text-xs text-gray-400 font-mono bg-[#0A0E27] px-3 py-1.5 rounded block overflow-x-auto">
+          {code}
+        </code>
       </div>
     </div>
   );

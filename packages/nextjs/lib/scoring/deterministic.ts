@@ -1,5 +1,5 @@
-import type { WalletProfile, CreditScore, ScoreBreakdown } from "~~/types/credit";
-import { getRiskTier, SCORE_MIN, SCORE_MAX } from "~~/types/credit";
+import type { CreditScore, ScoreBreakdown, WalletProfile } from "~~/types/credit";
+import { SCORE_MAX, SCORE_MIN, getRiskTier } from "~~/types/credit";
 
 // ============================================
 // Deterministic Weighted Scoring Algorithm
@@ -9,10 +9,10 @@ import { getRiskTier, SCORE_MIN, SCORE_MAX } from "~~/types/credit";
 const WEIGHTS = {
   walletAge: 0.15,
   txFrequency: 0.05,
-  defiDiversity: 0.10,
-  repaymentHistory: 0.30,
+  defiDiversity: 0.1,
+  repaymentHistory: 0.3,
   liquidationPenalty: 0.25,
-  stablecoinRatio: 0.10,
+  stablecoinRatio: 0.1,
   totalValue: 0.05,
 } as const;
 
@@ -75,10 +75,7 @@ function scoreDefiDiversity(protocolCount: number): { score: number; details: st
   return { score, details: `DeFi protocols used: ${protocolCount}` };
 }
 
-function scoreRepaymentHistory(
-  repaymentRatio: number,
-  totalBorrows: number,
-): { score: number; details: string } {
+function scoreRepaymentHistory(repaymentRatio: number, totalBorrows: number): { score: number; details: string } {
   // If no borrows, neutral score
   if (totalBorrows === 0) {
     return { score: 100, details: "No lending history (neutral)" };
@@ -193,10 +190,7 @@ function computeOffChainBonus(data?: OffChainData): { score: number; maxScore: n
 // Main Scoring Function
 // ============================================
 
-export function computeCreditScore(
-  profile: WalletProfile,
-  offChainData?: OffChainData,
-): CreditScore {
+export function computeCreditScore(profile: WalletProfile, offChainData?: OffChainData): CreditScore {
   const BASE_SCORE = 300;
 
   // Compute each factor

@@ -2,17 +2,16 @@
  * EAS (Ethereum Attestation Service) Integration
  * Handles schema registration, attestation creation, and verification.
  */
-
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { ethers } from "ethers";
+import { getOrRegisterSchemaUid } from "~~/lib/attestation/register-schema";
 import {
-  EAS_ADDRESSES,
+  ATTESTATION_TTL_SECONDS,
   CREDIT_SCORE_SCHEMA,
   CREDIT_SCORE_SCHEMA_UIDS,
   EASSCAN_URLS,
-  ATTESTATION_TTL_SECONDS,
+  EAS_ADDRESSES,
 } from "~~/lib/constants";
-import { getOrRegisterSchemaUid } from "~~/lib/attestation/register-schema";
 
 /**
  * Create a credit score attestation on-chain.
@@ -65,7 +64,7 @@ export async function createCreditScoreAttestation(params: {
   });
 
   const attestationUid = await tx.wait();
-  const txHash = typeof tx === "object" && "tx" in tx ? (tx as any).tx?.hash : attestationUid; // eslint-disable-line @typescript-eslint/no-explicit-any
+  const txHash = typeof tx === "object" && "tx" in tx ? (tx as any).tx?.hash : attestationUid;
   const easScanUrl = `${EASSCAN_URLS[params.chain]}/attestation/view/${attestationUid}`;
 
   return {

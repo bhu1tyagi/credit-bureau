@@ -2,8 +2,7 @@
  * GoldRush / Covalent SDK Data Fetcher
  * Fetches on-chain wallet data across multiple chains using @covalenthq/client-sdk.
  */
-
-import { GoldRushClient, type Chain } from "@covalenthq/client-sdk";
+import { type Chain, GoldRushClient } from "@covalenthq/client-sdk";
 
 const GOLDRUSH_API_KEY = process.env.GOLDRUSH_API_KEY || "";
 
@@ -18,9 +17,7 @@ function getClient(): GoldRushClient {
 
 // ---------- Stablecoin & DeFi Protocol Detection ----------
 
-const STABLECOINS = new Set([
-  "USDC", "USDT", "DAI", "FRAX", "LUSD", "BUSD", "TUSD", "GUSD", "USDP", "PYUSD",
-]);
+const STABLECOINS = new Set(["USDC", "USDT", "DAI", "FRAX", "LUSD", "BUSD", "TUSD", "GUSD", "USDP", "PYUSD"]);
 
 /** Map of token-symbol prefixes/names to the protocol they represent. */
 const DEFI_TOKEN_MATCHERS: { test: (symbol: string, name: string) => boolean; protocol: string }[] = [
@@ -29,9 +26,9 @@ const DEFI_TOKEN_MATCHERS: { test: (symbol: string, name: string) => boolean; pr
   // Compound cTokens
   { test: (s, n) => /^c[A-Z]/.test(s) || n.toLowerCase().includes("compound"), protocol: "Compound" },
   // Lido
-  { test: (s) => ["STETH", "WSTETH"].includes(s.toUpperCase()), protocol: "Lido" },
+  { test: s => ["STETH", "WSTETH"].includes(s.toUpperCase()), protocol: "Lido" },
   // Rocket Pool
-  { test: (s) => s.toUpperCase() === "RETH", protocol: "Rocket Pool" },
+  { test: s => s.toUpperCase() === "RETH", protocol: "Rocket Pool" },
   // Curve
   { test: (_, n) => n.toLowerCase().includes("curve"), protocol: "Curve" },
   // Convex
@@ -59,10 +56,7 @@ export interface TokenBalancesResult {
 /**
  * Get token balances for a wallet on a specific chain.
  */
-export async function getTokenBalances(
-  address: string,
-  chainName: string,
-): Promise<TokenBalancesResult | null> {
+export async function getTokenBalances(address: string, chainName: string): Promise<TokenBalancesResult | null> {
   try {
     const client = getClient();
     const resp = await client.BalanceService.getTokenBalancesForWalletAddress(chainName as Chain, address);
@@ -172,10 +166,7 @@ export interface MultiChainWalletData {
 /**
  * Aggregate wallet data across multiple chains.
  */
-export async function getWalletDataMultiChain(
-  address: string,
-  chainNames: string[],
-): Promise<MultiChainWalletData> {
+export async function getWalletDataMultiChain(address: string, chainNames: string[]): Promise<MultiChainWalletData> {
   const results = await Promise.allSettled(
     chainNames.flatMap(chain => [
       getTokenBalances(address, chain).then(r => ({ chain, type: "balances" as const, data: r })),

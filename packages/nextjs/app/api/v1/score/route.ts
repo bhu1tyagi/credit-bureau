@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { isAddress } from "viem";
 import { aggregateWalletData } from "~~/lib/data/aggregator";
 import { computeCreditScore } from "~~/lib/scoring/deterministic";
-import { getMLPrediction, blendScores } from "~~/lib/scoring/ml-client";
+import { blendScores, getMLPrediction } from "~~/lib/scoring/ml-client";
 import { createServerClient } from "~~/lib/supabase/server";
-import { isAddress } from "viem";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -31,10 +31,7 @@ export async function GET(request: NextRequest) {
 
     // Attempt ML prediction
     const mlPrediction = await getMLPrediction(profile);
-    const { score, modelVersion, confidence: blendedConfidence } = blendScores(
-      deterministicResult.score,
-      mlPrediction,
-    );
+    const { score, modelVersion, confidence: blendedConfidence } = blendScores(deterministicResult.score, mlPrediction);
 
     const result = {
       address,

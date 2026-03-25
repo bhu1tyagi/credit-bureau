@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Code, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { ArrowRight, Code } from "lucide-react";
 
 const SDK_EXAMPLE = `import { CredBureau } from '@credburo/sdk';
 
@@ -71,10 +71,9 @@ export default function DeveloperSection() {
               </span>
             </h2>
             <p className="mb-6 text-gray-400 leading-relaxed">
-              Use our TypeScript SDK or REST API to fetch credit scores, verify
-              attestations, and build credit-aware DeFi applications.
-              Under-collateralized lending, tiered rates, and credit delegation
-              are just a few lines of code away.
+              Use our TypeScript SDK or REST API to fetch credit scores, verify attestations, and build credit-aware
+              DeFi applications. Under-collateralized lending, tiered rates, and credit delegation are just a few lines
+              of code away.
             </p>
             <ul className="mb-8 space-y-2 text-sm text-gray-400">
               <li className="flex items-center gap-2">
@@ -113,7 +112,7 @@ export default function DeveloperSection() {
             <div className="rounded-xl border border-[#2A2F4D] bg-[#0A0E27] overflow-hidden">
               {/* Tab bar */}
               <div className="flex border-b border-[#2A2F4D]">
-                {tabs.map((tab) => (
+                {tabs.map(tab => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}

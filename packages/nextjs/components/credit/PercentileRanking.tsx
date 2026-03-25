@@ -46,15 +46,9 @@ export default function PercentileRanking({ percentile, totalWallets }: Percenti
 
       {/* Summary */}
       <p className="text-sm text-gray-300">
-        Top{" "}
-        <span className="font-semibold text-cyan-400">{topPercent}%</span>{" "}
-        of DeFi users
+        Top <span className="font-semibold text-cyan-400">{topPercent}%</span> of DeFi users
       </p>
-      {totalWallets && (
-        <p className="text-xs text-gray-500 mt-1">
-          Out of {formatNumber(totalWallets)} wallets scored
-        </p>
-      )}
+      {totalWallets && <p className="text-xs text-gray-500 mt-1">Out of {formatNumber(totalWallets)} wallets scored</p>}
     </div>
   );
 }

@@ -2,18 +2,9 @@
 
 import { useMemo } from "react";
 import { motion } from "framer-motion";
-import {
-  Lightbulb,
-  TrendingUp,
-  Clock,
-  Repeat,
-  Shield,
-  Coins,
-  BarChart3,
-  Wallet,
-} from "lucide-react";
-import type { ScoreBreakdown } from "~~/types/credit";
+import { BarChart3, Clock, Coins, Lightbulb, Repeat, Shield, TrendingUp, Wallet } from "lucide-react";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
+import type { ScoreBreakdown } from "~~/types/credit";
 
 interface ImprovementTipsProps {
   breakdown: ScoreBreakdown;
@@ -26,10 +17,7 @@ interface Tip {
   impact: number;
 }
 
-const FACTOR_TIPS: Record<
-  string,
-  { icon: React.ReactNode; title: string; description: string }
-> = {
+const FACTOR_TIPS: Record<string, { icon: React.ReactNode; title: string; description: string }> = {
   walletAge: {
     icon: <Clock className="w-5 h-5" />,
     title: "Build Wallet History",
@@ -75,8 +63,7 @@ const FACTOR_TIPS: Record<
   offChainBonus: {
     icon: <Shield className="w-5 h-5" />,
     title: "Complete Off-Chain Verification",
-    description:
-      "Verify your FICO score, bank balance, or income through zkTLS proofs to unlock bonus score points.",
+    description: "Verify your FICO score, bank balance, or income through zkTLS proofs to unlock bonus score points.",
   },
 };
 
@@ -118,21 +105,14 @@ export default function ImprovementTips({ breakdown }: ImprovementTipsProps) {
         <h3 className="text-sm font-semibold text-white">Improvement Tips</h3>
       </div>
 
-      <motion.div
-        className="space-y-3"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-      >
+      <motion.div className="space-y-3" variants={staggerContainer} initial="initial" animate="animate">
         {tips.map((tip, i) => (
           <motion.div
             key={i}
             variants={staggerItem}
             className="flex gap-3 rounded-lg border border-[#2A2F4D] bg-[#111631]/80 p-4 hover:border-amber-500/20 transition-colors"
           >
-            <div className="flex-shrink-0 rounded-lg bg-amber-500/10 p-2 text-amber-400 self-start">
-              {tip.icon}
-            </div>
+            <div className="flex-shrink-0 rounded-lg bg-amber-500/10 p-2 text-amber-400 self-start">{tip.icon}</div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center justify-between gap-2 mb-1">
                 <h4 className="text-sm font-medium text-white">{tip.title}</h4>

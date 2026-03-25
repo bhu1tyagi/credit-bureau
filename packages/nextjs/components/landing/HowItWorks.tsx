@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Wallet, BarChart3, Stamp } from "lucide-react";
+import { BarChart3, Stamp, Wallet } from "lucide-react";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
 
 const STEPS = [
@@ -40,12 +40,8 @@ export default function HowItWorks() {
           transition={{ duration: 0.5 }}
           className="mb-16 text-center"
         >
-          <h2 className="mb-3 text-3xl font-bold text-white sm:text-4xl">
-            How It Works
-          </h2>
-          <p className="mx-auto max-w-lg text-gray-400">
-            Three simple steps to build your on-chain credit identity.
-          </p>
+          <h2 className="mb-3 text-3xl font-bold text-white sm:text-4xl">How It Works</h2>
+          <p className="mx-auto max-w-lg text-gray-400">Three simple steps to build your on-chain credit identity.</p>
         </motion.div>
 
         {/* Steps */}

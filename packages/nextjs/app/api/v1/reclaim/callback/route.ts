@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { type Proof, verifyReclaimProof, RECLAIM_PROVIDERS, type ProviderType } from "~~/lib/reclaim/client";
+import { type Proof, type ProviderType, RECLAIM_PROVIDERS, verifyReclaimProof } from "~~/lib/reclaim/client";
 import { createServerClient } from "~~/lib/supabase/server";
 
 /**
@@ -26,10 +26,7 @@ export async function POST(request: NextRequest) {
   try {
     proof = await request.json();
   } catch {
-    return NextResponse.json(
-      { error: { code: "INVALID_BODY", message: "Invalid JSON body" } },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: { code: "INVALID_BODY", message: "Invalid JSON body" } }, { status: 400 });
   }
 
   if (!proof || !proof.claimData || !proof.signatures) {
@@ -49,9 +46,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const userAddress = (proof.extractedParameterValues?.wallet_address as string)
-      || (proof.extractedParameterValues?.address as string)
-      || "";
+    const userAddress =
+      (proof.extractedParameterValues?.wallet_address as string) ||
+      (proof.extractedParameterValues?.address as string) ||
+      "";
 
     if (!userAddress) {
       return NextResponse.json(

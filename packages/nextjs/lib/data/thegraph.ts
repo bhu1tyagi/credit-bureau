@@ -2,7 +2,6 @@
  * The Graph — Aave V3 Subgraph Data Fetcher
  * Queries borrow, repay, and liquidation events for credit scoring.
  */
-
 import { AAVE_V3_SUBGRAPHS } from "~~/lib/constants";
 
 interface AaveBorrow {
@@ -94,7 +93,7 @@ export async function getAaveData(address: string, chainName: string): Promise<A
     }
   }`;
 
-  const data = await querySubgraph(subgraphUrl, query) as {
+  const data = (await querySubgraph(subgraphUrl, query)) as {
     borrows?: AaveBorrow[];
     repays?: AaveRepay[];
     liquidationCalls?: AaveLiquidation[];
@@ -154,9 +153,7 @@ export async function getAaveDataMultiChain(
   liquidationVolumeUsd: number;
   hasLendingHistory: boolean;
 }> {
-  const results = await Promise.allSettled(
-    chainNames.map(chain => getAaveData(address, chain)),
-  );
+  const results = await Promise.allSettled(chainNames.map(chain => getAaveData(address, chain)));
 
   let totalBorrows = 0;
   let totalRepays = 0;

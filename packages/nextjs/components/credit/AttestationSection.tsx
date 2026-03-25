@@ -1,19 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
+import { motion } from "framer-motion";
+import { ChevronDown, Clock, ExternalLink, Loader2, Stamp } from "lucide-react";
 import toast from "react-hot-toast";
-import {
-  Stamp,
-  ExternalLink,
-  Clock,
-  Loader2,
-  ChevronDown,
-} from "lucide-react";
-import type { Attestation } from "~~/types/credit";
-import { truncateAddress, timeAgo } from "~~/lib/utils";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
+import { timeAgo, truncateAddress } from "~~/lib/utils";
+import type { Attestation } from "~~/types/credit";
 
 interface AttestationSectionProps {
   attestations: Attestation[];
@@ -38,11 +32,7 @@ function getExpiryText(expiresAt: number): string {
   return `${hours}h remaining`;
 }
 
-export default function AttestationSection({
-  attestations,
-  onMint,
-  isMinting,
-}: AttestationSectionProps) {
+export default function AttestationSection({ attestations, onMint, isMinting }: AttestationSectionProps) {
   const [selectedChain, setSelectedChain] = useState(SUPPORTED_CHAINS[0].value);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const handleMint = async () => {
@@ -79,13 +69,11 @@ export default function AttestationSection({
             className="flex items-center justify-between gap-2 w-full sm:w-44 rounded-lg border border-[#2A2F4D] bg-[#111631] px-3 py-2.5 text-sm text-white hover:border-[#3B82F6]/30 transition-colors"
           >
             <span>{SUPPORTED_CHAINS.find(c => c.value === selectedChain)?.label || selectedChain}</span>
-            <ChevronDown
-              className={`w-4 h-4 text-gray-400 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
-            />
+            <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform ${dropdownOpen ? "rotate-180" : ""}`} />
           </button>
           {dropdownOpen && (
             <div className="absolute z-10 mt-1 w-full rounded-lg border border-[#2A2F4D] bg-[#111631] py-1 shadow-xl">
-              {SUPPORTED_CHAINS.map((chain) => (
+              {SUPPORTED_CHAINS.map(chain => (
                 <button
                   key={chain.value}
                   onClick={() => {
@@ -125,13 +113,8 @@ export default function AttestationSection({
 
       {/* Attestation list */}
       {attestations.length > 0 ? (
-        <motion.div
-          className="space-y-2"
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-        >
-          {attestations.map((att) => (
+        <motion.div className="space-y-2" variants={staggerContainer} initial="initial" animate="animate">
+          {attestations.map(att => (
             <motion.div
               key={att.id}
               variants={staggerItem}
@@ -143,9 +126,7 @@ export default function AttestationSection({
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm text-white">
-                      {truncateAddress(att.attestationUid, 6)}
-                    </span>
+                    <span className="font-mono text-sm text-white">{truncateAddress(att.attestationUid, 6)}</span>
                     <span className="rounded-full bg-[#2A2F4D] px-2 py-0.5 text-[10px] text-gray-400 capitalize">
                       {att.chain}
                     </span>
@@ -177,9 +158,7 @@ export default function AttestationSection({
         <div className="rounded-lg border border-dashed border-[#2A2F4D] py-8 text-center">
           <Stamp className="w-8 h-8 text-gray-600 mx-auto mb-2" />
           <p className="text-sm text-gray-500">No attestations yet</p>
-          <p className="text-xs text-gray-600 mt-1">
-            Mint your first Credit Passport above
-          </p>
+          <p className="text-xs text-gray-600 mt-1">Mint your first Credit Passport above</p>
         </div>
       )}
     </div>

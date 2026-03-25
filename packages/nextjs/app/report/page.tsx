@@ -1,19 +1,31 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useAccount } from "wagmi";
-import { useCreditScore } from "~~/hooks/useCreditScore";
-import { useScoreHistory } from "~~/hooks/useScoreHistory";
-import { RISK_TIER_COLORS } from "~~/types/credit";
-import { FileText, Download, Share2, Wallet, Clock, Activity, Shield, Layers, DollarSign, AlertTriangle, Coins } from "lucide-react";
-import { motion } from "framer-motion";
-import { staggerContainer, staggerItem } from "~~/lib/animations";
-import { truncateAddress } from "~~/lib/utils";
+import { type Variants, motion } from "framer-motion";
+import {
+  Activity,
+  AlertTriangle,
+  Clock,
+  Coins,
+  DollarSign,
+  Download,
+  FileText,
+  Layers,
+  Share2,
+  Shield,
+  Wallet,
+} from "lucide-react";
 import toast from "react-hot-toast";
+import { useAccount } from "wagmi";
 import ScoreGauge from "~~/components/credit/ScoreGauge";
 import ScoreHistoryChart from "~~/components/credit/ScoreHistoryChart";
+import { useCreditScore } from "~~/hooks/useCreditScore";
+import { useScoreHistory } from "~~/hooks/useScoreHistory";
+import { staggerContainer, staggerItem } from "~~/lib/animations";
+import { truncateAddress } from "~~/lib/utils";
+import { RISK_TIER_COLORS } from "~~/types/credit";
 
-const sectionVariants = {
+const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: (i: number) => ({
     opacity: 1,
@@ -84,9 +96,16 @@ function ReportPage() {
     <div className="min-h-screen bg-[#0A0E27] py-8">
       <style jsx global>{`
         @media print {
-          body { background: white !important; color: black !important; }
-          .no-print { display: none !important; }
-          .print-only { display: block !important; }
+          body {
+            background: white !important;
+            color: black !important;
+          }
+          .no-print {
+            display: none !important;
+          }
+          .print-only {
+            display: block !important;
+          }
         }
       `}</style>
 
@@ -155,22 +174,32 @@ function ReportPage() {
         </motion.section>
 
         {/* Detailed Breakdown */}
-        <motion.section
-          className="mb-6"
-          custom={1}
-          variants={sectionVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <motion.section className="mb-6" custom={1} variants={sectionVariants} initial="hidden" animate="visible">
           <h2 className="text-lg font-semibold text-white mb-4">Score Breakdown</h2>
           <motion.div className="space-y-3" variants={staggerContainer} initial="initial" animate="animate">
             {[
               { name: "Wallet Age", factor: score.breakdown.walletAge, icon: <Clock className="w-4 h-4" /> },
-              { name: "Transaction Frequency", factor: score.breakdown.txFrequency, icon: <Activity className="w-4 h-4" /> },
+              {
+                name: "Transaction Frequency",
+                factor: score.breakdown.txFrequency,
+                icon: <Activity className="w-4 h-4" />,
+              },
               { name: "DeFi Diversity", factor: score.breakdown.defiDiversity, icon: <Layers className="w-4 h-4" /> },
-              { name: "Repayment History", factor: score.breakdown.repaymentHistory, icon: <DollarSign className="w-4 h-4" /> },
-              { name: "Liquidation Penalty", factor: score.breakdown.liquidationPenalty, icon: <AlertTriangle className="w-4 h-4" /> },
-              { name: "Stablecoin Ratio", factor: score.breakdown.stablecoinRatio, icon: <Coins className="w-4 h-4" /> },
+              {
+                name: "Repayment History",
+                factor: score.breakdown.repaymentHistory,
+                icon: <DollarSign className="w-4 h-4" />,
+              },
+              {
+                name: "Liquidation Penalty",
+                factor: score.breakdown.liquidationPenalty,
+                icon: <AlertTriangle className="w-4 h-4" />,
+              },
+              {
+                name: "Stablecoin Ratio",
+                factor: score.breakdown.stablecoinRatio,
+                icon: <Coins className="w-4 h-4" />,
+              },
               { name: "Portfolio Value", factor: score.breakdown.totalValue, icon: <DollarSign className="w-4 h-4" /> },
               { name: "Off-Chain Bonus", factor: score.breakdown.offChainBonus, icon: <Shield className="w-4 h-4" /> },
             ].map(({ name, factor, icon }) => {
@@ -197,7 +226,13 @@ function ReportPage() {
                       className="h-full rounded-full transition-all duration-1000"
                       style={{
                         width: `${Math.min(progress * 100, 100)}%`,
-                        backgroundColor: isNeg ? "#EF4444" : progress > 0.7 ? "#10B981" : progress > 0.4 ? "#F59E0B" : "#EF4444",
+                        backgroundColor: isNeg
+                          ? "#EF4444"
+                          : progress > 0.7
+                            ? "#10B981"
+                            : progress > 0.4
+                              ? "#F59E0B"
+                              : "#EF4444",
                       }}
                     />
                   </div>
@@ -210,13 +245,7 @@ function ReportPage() {
 
         {/* Score History */}
         {history.length > 0 && (
-          <motion.section
-            className="mb-6"
-            custom={2}
-            variants={sectionVariants}
-            initial="hidden"
-            animate="visible"
-          >
+          <motion.section className="mb-6" custom={2} variants={sectionVariants} initial="hidden" animate="visible">
             <h2 className="text-lg font-semibold text-white mb-4">Score History</h2>
             <div className="p-6 rounded-2xl bg-[#1A1F3D]/50 border border-[#2A2F4D]">
               <ScoreHistoryChart
@@ -236,9 +265,9 @@ function ReportPage() {
           animate="visible"
         >
           <p>
-            This credit report is generated based on publicly available on-chain data.
-            It is not a financial recommendation. Scores are computed using a deterministic algorithm
-            and may not reflect all aspects of creditworthiness. Past performance does not guarantee future results.
+            This credit report is generated based on publicly available on-chain data. It is not a financial
+            recommendation. Scores are computed using a deterministic algorithm and may not reflect all aspects of
+            creditworthiness. Past performance does not guarantee future results.
           </p>
         </motion.div>
       </div>
