@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     try {
       const supabase = createServerClient();
       await supabase.from("credit_scores").insert({
-        wallet_address: address,
+        wallet_address: address.toLowerCase(),
         score: blended.score,
         risk_tier: deterministicResult.riskTier,
         breakdown: deterministicResult.breakdown,

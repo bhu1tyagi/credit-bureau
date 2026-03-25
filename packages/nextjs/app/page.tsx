@@ -69,7 +69,7 @@ function HeroSection() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button
-              onClick={() => router.push(isConnected ? "/dashboard" : "/dashboard")}
+              onClick={() => router.push("/dashboard")}
               className="px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-xl transition-all hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] flex items-center justify-center gap-2"
             >
               <Wallet className="w-5 h-5" />

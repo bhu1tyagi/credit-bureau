@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
+import toast from "react-hot-toast";
 import {
   Stamp,
   ExternalLink,
@@ -15,11 +17,17 @@ import { staggerContainer, staggerItem } from "~~/lib/animations";
 
 interface AttestationSectionProps {
   attestations: Attestation[];
-  onMint: (chain: string) => void;
+  onMint: (chain: string) => Promise<{ success: boolean; easScanUrl?: string } | void>;
   isMinting: boolean;
 }
 
-const SUPPORTED_CHAINS = ["Ethereum", "Base", "Arbitrum", "Optimism", "Polygon"];
+// Chain display names → API chain IDs
+const SUPPORTED_CHAINS = [
+  { label: "Base Sepolia", value: "base-sepolia" },
+  { label: "Sepolia", value: "sepolia" },
+  { label: "Arbitrum Sepolia", value: "arbitrum-sepolia" },
+  { label: "Optimism Sepolia", value: "optimism-sepolia" },
+];
 
 function getExpiryText(expiresAt: number): string {
   const diff = expiresAt - Date.now();
@@ -35,8 +43,25 @@ export default function AttestationSection({
   onMint,
   isMinting,
 }: AttestationSectionProps) {
-  const [selectedChain, setSelectedChain] = useState(SUPPORTED_CHAINS[0]);
+  const [selectedChain, setSelectedChain] = useState(SUPPORTED_CHAINS[0].value);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const handleMint = async () => {
+    try {
+      const result = await onMint(selectedChain);
+      if (result && "success" in result && result.success) {
+        // Fire confetti!
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ["#3B82F6", "#06B6D4", "#10B981", "#F59E0B"],
+        });
+        toast.success("Credit Passport minted successfully!");
+      }
+    } catch {
+      toast.error("Failed to mint attestation. Please try again.");
+    }
+  };
 
   return (
     <div className="rounded-xl border border-[#2A2F4D] bg-[#1A1F3D]/50 backdrop-blur-sm p-5">
@@ -53,7 +78,7 @@ export default function AttestationSection({
             onClick={() => setDropdownOpen(!dropdownOpen)}
             className="flex items-center justify-between gap-2 w-full sm:w-44 rounded-lg border border-[#2A2F4D] bg-[#111631] px-3 py-2.5 text-sm text-white hover:border-[#3B82F6]/30 transition-colors"
           >
-            <span>{selectedChain}</span>
+            <span>{SUPPORTED_CHAINS.find(c => c.value === selectedChain)?.label || selectedChain}</span>
             <ChevronDown
               className={`w-4 h-4 text-gray-400 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
             />
@@ -62,16 +87,16 @@ export default function AttestationSection({
             <div className="absolute z-10 mt-1 w-full rounded-lg border border-[#2A2F4D] bg-[#111631] py-1 shadow-xl">
               {SUPPORTED_CHAINS.map((chain) => (
                 <button
-                  key={chain}
+                  key={chain.value}
                   onClick={() => {
-                    setSelectedChain(chain);
+                    setSelectedChain(chain.value);
                     setDropdownOpen(false);
                   }}
                   className={`w-full px-3 py-2 text-left text-sm hover:bg-[#1A1F3D] transition-colors ${
-                    chain === selectedChain ? "text-blue-400" : "text-gray-300"
+                    chain.value === selectedChain ? "text-blue-400" : "text-gray-300"
                   }`}
                 >
-                  {chain}
+                  {chain.label}
                 </button>
               ))}
             </div>
@@ -80,7 +105,7 @@ export default function AttestationSection({
 
         {/* Mint button */}
         <button
-          onClick={() => onMint(selectedChain)}
+          onClick={handleMint}
           disabled={isMinting}
           className="flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
         >

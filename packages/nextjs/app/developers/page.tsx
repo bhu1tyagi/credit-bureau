@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Code, Terminal, Key, Webhook, Copy, Check } from "lucide-react";
+import { Code, Terminal, Key, Webhook, Copy, Check, AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
+import toast from "react-hot-toast";
 
 const TABS = ["Overview", "API Reference", "SDK", "API Keys"] as const;
 type Tab = typeof TABS[number];
@@ -153,16 +154,79 @@ const verification = await cb.attestation.verify({
 }
 
 function ApiKeysTab() {
+  const [generatedKey, setGeneratedKey] = useState<string | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCreateKey = async () => {
+    setIsGenerating(true);
+    // Simulate a brief delay for UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const key = "cb_live_" + crypto.randomUUID().replace(/-/g, "").slice(0, 24);
+    setGeneratedKey(key);
+    setIsGenerating(false);
+    toast.success("API key created successfully!");
+  };
+
+  const handleCopyKey = async () => {
+    if (!generatedKey) return;
+    await navigator.clipboard.writeText(generatedKey);
+    setCopied(true);
+    toast.success("API key copied to clipboard!");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="p-6 rounded-xl bg-[#1A1F3D]/50 border border-[#2A2F4D]">
       <h2 className="text-lg font-semibold text-white mb-3">API Keys</h2>
       <p className="text-gray-400 mb-6">
         Connect your wallet and create an API key to start making requests.
       </p>
-      <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all flex items-center gap-2">
-        <Key className="w-4 h-4" />
-        Create API Key
-      </button>
+
+      {generatedKey ? (
+        <div className="p-5 rounded-xl bg-[#0A0E27] border border-emerald-500/30 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Key className="w-4 h-4 text-emerald-400" />
+            <span className="text-sm font-semibold text-emerald-400">API Key Generated</span>
+          </div>
+          <div className="flex items-center gap-3 mb-4">
+            <code className="flex-1 text-sm font-mono text-white bg-[#1A1F3D] px-4 py-3 rounded-lg break-all">
+              {generatedKey}
+            </code>
+            <button
+              onClick={handleCopyKey}
+              className="p-2.5 bg-[#1A1F3D] hover:bg-[#2A2F4D] rounded-lg text-gray-400 hover:text-white transition-colors shrink-0"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+          <div className="flex items-start gap-2 mb-4">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-400">
+              Save this key now. It won&apos;t be shown again.
+            </p>
+          </div>
+          <button
+            onClick={() => {
+              setGeneratedKey(null);
+              setCopied(false);
+            }}
+            className="px-4 py-2 bg-[#1A1F3D] border border-[#2A2F4D] hover:border-[#3A3F5D] text-gray-300 hover:text-white rounded-lg transition-all text-sm"
+          >
+            Done
+          </button>
+        </div>
+      ) : (
+        <button
+          onClick={handleCreateKey}
+          disabled={isGenerating}
+          className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition-all flex items-center gap-2"
+        >
+          <Key className="w-4 h-4" />
+          {isGenerating ? "Generating..." : "Create API Key"}
+        </button>
+      )}
+
       <div className="mt-6 text-sm text-gray-500">
         <p>Free tier: 100 requests/minute</p>
         <p>Pro tier: 1,000 requests/minute</p>

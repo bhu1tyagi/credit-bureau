@@ -71,7 +71,7 @@ export default function ExplorerPage() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Enter wallet address (0x...)"
-              className="flex-1 px-4 py-3 bg-[#1A1F3D] border border-[#2A2F4D] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 transition-colors font-mono text-sm"
+              className="flex-1 px-4 py-3 bg-[#1A1F3D] border border-[#2A2F4D] rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:shadow-[0_0_20px_rgba(59,130,246,0.15)] transition-all font-mono text-sm"
             />
             <button
               type="submit"
