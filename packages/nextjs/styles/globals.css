@@ -121,4 +121,30 @@
 .link:hover {
   opacity: 80%;
 }
-  
+
+/* CredBureau Design Tokens */
+:root {
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", monospace;
+
+  --cb-bg: #0A0E27;
+  --cb-surface: #111631;
+  --cb-card: #1A1F3D;
+  --cb-border: #2A2F4D;
+  --cb-primary: #3B82F6;
+  --cb-secondary: #06B6D4;
+  --cb-excellent: #10B981;
+  --cb-good: #3B82F6;
+  --cb-fair: #F59E0B;
+  --cb-poor: #F97316;
+  --cb-very-poor: #EF4444;
+}
+
+.font-sans {
+  font-family: var(--font-sans);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+

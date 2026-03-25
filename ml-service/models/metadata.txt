@@ -1,0 +1,4 @@
+training_date=2026-03-25T07:05:54.759969
+n_samples=5000
+test_mae=12.56
+features=wallet_age_days,tx_count,defi_protocol_count,repayment_ratio,liquidation_count,stablecoin_ratio,total_value_usd,unique_token_count,nft_count,governance_votes,bridge_tx_count,avg_tx_value_usd,max_single_tx_usd,active_days_ratio,log_total_value_usd,log_tx_count,activity_density,defi_diversity_score,value_per_tx,liquidation_ratio

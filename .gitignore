@@ -21,3 +21,20 @@ node_modules
 
 # cli
 dist
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+*.pkl
+
+# Environment files
+.env
+.env.local
+.env*.local
+
+# ML model artifacts
+ml-service/venv/
+ml-service/models/*.pkl
