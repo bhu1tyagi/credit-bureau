@@ -4,12 +4,14 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 import { isAddress } from "viem";
+import { detectChainType } from "~~/lib/constants";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
 import { truncateAddress } from "~~/lib/utils";
-import { RISK_TIER_COLORS, type RiskTier } from "~~/types/credit";
+import { type ChainType, RISK_TIER_COLORS, type RiskTier } from "~~/types/credit";
 
 interface SearchResult {
   address: string;
+  chainType: ChainType;
   score: number;
   riskTier: RiskTier;
   timestamp: string;
@@ -25,9 +27,9 @@ export default function ExplorerPage() {
     e.preventDefault();
     if (!query) return;
 
-    // Validate address
-    if (!isAddress(query)) {
-      setError("Please enter a valid Ethereum address");
+    const chainType = detectChainType(query);
+    if (chainType === "unknown") {
+      setError("Please enter a valid EVM (0x...) or Solana address");
       return;
     }
 
@@ -43,6 +45,7 @@ export default function ExplorerPage() {
       const data = await response.json();
       setResult({
         address: data.address,
+        chainType: data.chainType || "evm",
         score: data.score,
         riskTier: data.riskTier,
         timestamp: data.timestamp,

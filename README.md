@@ -1,13 +1,22 @@
 # CredBureau — The Credit Bureau for DeFi
 
+![Status](https://img.shields.io/badge/Status-Alpha%20%2F%20Testnet-orange)
+![Chains](https://img.shields.io/badge/Chains-Base%20Sepolia%20%7C%20Sepolia%20%7C%20Arbitrum%20Sepolia%20%7C%20Optimism%20Sepolia-blue)
+![Built With](https://img.shields.io/badge/Built%20With-Scaffold--ETH%202-blueviolet)
+![Smart Contracts](https://img.shields.io/badge/Smart%20Contracts-Foundry%20%2F%20Solidity%20%5E0.8.20-363636)
+![Tests](https://img.shields.io/badge/Tests-50%20passing-brightgreen)
+
 **Portable, composable credit identity for the on-chain economy.**
 
 CredBureau is a full-stack DeFi credit bureau that scores crypto wallets (300-850 FICO-equivalent range) based on on-chain lending history, portfolio diversity, and repayment behavior. Users can mint privacy-preserving on-chain attestations (via EAS) of their score and use a portable credit identity across DeFi lending protocols. The platform also exposes a REST API + npm SDK so protocols like Aave, Morpho, and Compound can plug in credit checks as middleware.
+
+> **Current Status:** Alpha / Testnet — The application is live on **testnet networks only** (Base Sepolia, Ethereum Sepolia, Arbitrum Sepolia, Optimism Sepolia). Smart contracts are deployed on localhost for development and ready for testnet deployment. See [Deployment Status & Network Info](#deployment-status--network-info) for details.
 
 ---
 
 ## Table of Contents
 
+- [Deployment Status & Network Info](#deployment-status--network-info)
 - [Architecture Overview](#architecture-overview)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
@@ -25,7 +34,57 @@ CredBureau is a full-stack DeFi credit bureau that scores crypto wallets (300-85
 - [Environment Variables](#environment-variables)
 - [Setup & Running](#setup--running)
 - [Testing](#testing)
+- [CI/CD](#cicd)
 - [Deployment](#deployment)
+- [Roadmap to Mainnet](#roadmap-to-mainnet)
+
+---
+
+## Deployment Status & Network Info
+
+### Current Status: Alpha — Testnet Only
+
+CredBureau is currently deployed and operational on **Ethereum testnet networks**. It is **not on mainnet**.
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| **Frontend** | Deployed on Vercel | Next.js 15 app, accessible via Vercel deployment URL |
+| **Smart Contracts** | Localhost (dev) | Deployed on local Anvil chain (chain ID 31337). Ready for testnet deployment via `yarn deploy --network baseSepolia` |
+| **REST API** | Live (via Vercel) | 12 API endpoints under `/api/v1/` served by Next.js route handlers |
+| **ML Service** | Local / Docker | Runs locally on port 8000 or via Docker container. Not yet deployed to cloud |
+| **Database** | Supabase (cloud) | PostgreSQL with 8 tables, Row-Level Security enabled |
+
+### Supported Chains (All Testnets)
+
+| Chain | Chain ID | Type | Default | EAS Address | RPC |
+|-------|----------|------|---------|-------------|-----|
+| **Base Sepolia** | 84532 | L2 Testnet | Yes (attestations) | `0x4200000000000000000000000000000000000021` | `https://sepolia.base.org` |
+| **Ethereum Sepolia** | 11155111 | L1 Testnet | — | `0xC2679fBD37d54388Ce493F1DB75320D236e1815e` | `https://rpc.sepolia.org` |
+| **Arbitrum Sepolia** | 421614 | L2 Testnet | — | `0xbD75f629A22Dc1ceD33dDA0b68c546A1c035c458` | `https://sepolia-rollup.arbitrum.io/rpc` |
+| **Optimism Sepolia** | 11155420 | L2 Testnet | — | `0x4200000000000000000000000000000000000021` | `https://sepolia.optimism.io` |
+| **Foundry (localhost)** | 31337 | Local | Dev only | — | `http://127.0.0.1:8545` |
+
+**Default attestation chain**: Base Sepolia — chosen because EAS is available at a predeploy address (`0x4200...0021`) and gas is free on testnet.
+
+**Scoring data sources**: Even though the app targets testnets for attestations, the scoring engine fetches **real mainnet data** from GoldRush/Covalent and Aave V3 subgraphs (eth-mainnet, base-mainnet, arbitrum-mainnet, optimism-mainnet). This means credit scores reflect actual wallet history on mainnet, while attestations are minted on testnets for free.
+
+### Why Testnet?
+
+CredBureau is on testnet — not mainnet — for the following reasons:
+
+1. **Alpha phase** — The scoring algorithm, UI, and smart contracts are still under active development and iteration. Deploying to mainnet prematurely would lock in unfinished designs.
+
+2. **No real funds at risk** — Users can experiment freely with test ETH. Minting attestations, linking wallets, and testing the full flow costs nothing.
+
+3. **Free EAS attestations** — On testnet, creating an on-chain EAS attestation costs zero gas. On Base mainnet, each attestation costs approximately $0.005. During development and testing, free attestations allow rapid iteration.
+
+4. **Iterating on the ML model** — The XGBoost credit scoring model is currently trained on synthetic data (5,000 generated samples). Before mainnet, the model needs to be retrained on real-world wallet data for accurate predictions.
+
+5. **Security audits pending** — The three smart contracts (CreditScoreRegistry, CreditPassport, MultiWalletLinker) have 50 passing tests but have **not been formally audited** by a third-party security firm. Deploying to mainnet without an audit would put user trust at risk.
+
+6. **EAS schema finalization** — The credit score EAS schema (`uint16 creditScore, uint8 riskTier, uint256 timestamp, address wallet, bytes32 dataHash, bool hasOffChainData, uint8 modelVersion`) may still change. Once deployed to mainnet, schema changes require a new registration.
+
+7. **Rate limiting and API key enforcement** — The REST API currently has soft rate limits defined but not fully enforced. Production-grade rate limiting is needed before opening to mainnet traffic.
 
 ---
 
@@ -71,6 +130,8 @@ CredBureau is a full-stack DeFi credit bureau that scores crypto wallets (300-85
                |  8 tables      |   |  :8000         |   |  Contracts     |
                +----------------+   +----------------+   +----------------+
 ```
+
+> **Note on current deployment**: The architecture diagram above represents the full production design. Currently, the frontend + API runs on Vercel, the database is on Supabase (cloud), smart contracts are deployed on localhost (chain 31337) for development, and the ML service runs locally or via Docker. Scoring data is fetched from mainnet sources (GoldRush, The Graph), while attestations are minted on testnet (Base Sepolia by default).
 
 ### Data Flow: Wallet Connect to Credit Score
 
@@ -263,7 +324,7 @@ All data sources are fetched in parallel via `Promise.allSettled` — no single 
 The marketing homepage with 5 sections:
 
 - **Hero Section**: Full-viewport with animated gradient headline "The Credit Bureau for DeFi", subheadline, and two CTAs ("Check Your Score" + "For Developers"). Dark navy background with radial gradient and grid overlay.
-- **Stats Bar**: 4 dynamic counters fetched from `/api/v1/stats` — Wallets Scored, Chains Supported (4), Attestations Created, Max Score (850). Numbers animate on scroll.
+- **Stats Bar**: 4 dynamic counters fetched from `/api/v1/stats` — Wallets Scored, Chains Supported (4 testnets: Base Sepolia, Sepolia, Arbitrum Sepolia, Optimism Sepolia), Attestations Created, Max Score (850). Numbers animate on scroll.
 - **How It Works**: 3-step horizontal flow — Connect Wallet, Get Scored, Mint Passport. Each step has an icon, title, and description with stagger animations.
 - **Developer Section**: Two-column layout with SDK code snippet (syntax-highlighted in a terminal-style card) and CTA to developer portal.
 - **Waitlist CTA**: Email input form that inserts into Supabase `waitlist` table via `/api/v1/waitlist`. Handles duplicates gracefully.
@@ -275,7 +336,11 @@ The main user interface after wallet connection:
 - **Score Gauge**: Large SVG circular arc (270 degrees) with animated stroke colored by risk tier. Score number in center with count-up animation. Glowing shadow effect matching tier color.
 - **Summary Cards**: 4 cards showing Risk Tier, Confidence %, Chains Analyzed, and Model Version.
 - **Score Breakdown**: 8 cards in a responsive grid — one for each scoring factor. Each shows factor name, icon, score/maxScore with animated progress bar, weight percentage, and detail text.
-- **Action Cards**: 3 cards linking to Mint Credit Passport, View Full Report, and Link Another Wallet.
+- **Attestation Section**: Chain selector dropdown (Base Sepolia, Sepolia, Arbitrum Sepolia, Optimism Sepolia) + "Mint Credit Passport" button. Lists past attestations with UID, chain badge, timestamp, expiry countdown, and EASScan verification link. **Confetti animation** (canvas-confetti, 150 particles) triggers on successful mint with toast notification.
+- **Linked Wallets Panel**: Shows primary wallet with badge, linked wallets with chain-colored indicators. Link/unlink functionality with ECDSA signature verification.
+- **Score History Chart**: Recharts AreaChart with gradient fill showing score trends over the last 90 days. Custom tooltip with score and risk tier.
+- **Percentile Ranking**: Visual distribution bar (red-amber-green gradient) with animated position marker showing "Top X%" placement.
+- **Improvement Tips**: Auto-generated suggestions based on weakest scoring factors, sorted by potential impact. Shows estimated "+X pts" improvement per tip.
 - **Loading State**: Full skeleton matching the layout grid.
 - **Error State**: Retry button with error message.
 - **Empty State**: "Connect Your Wallet" prompt when no wallet connected.
@@ -530,7 +595,7 @@ All TypeScript type definitions: `CreditScore`, `ScoreBreakdown`, `ScoreFactor`,
 
 ## Smart Contracts
 
-3 Solidity contracts deployed via Foundry with **50 tests all passing**.
+3 Solidity contracts built with Foundry (Solidity ^0.8.20) with **50 tests all passing**. Currently deployed on localhost (chain 31337) for development — not yet deployed to any live testnet or mainnet.
 
 ### CreditScoreRegistry.sol
 
@@ -899,6 +964,38 @@ curl "http://localhost:3000/api/v1/history?address=0xd8dA6BF26964aF9D7eEd9e03E53
 
 ---
 
+## CI/CD
+
+### GitHub Actions
+
+A lint and type-check workflow runs on every push to `main` and on pull requests targeting `main`.
+
+**Workflow**: `.github/workflows/lint.yaml`
+
+| Step | What It Does |
+|------|-------------|
+| Checkout | Clones the repository |
+| Setup Node | Installs Node.js LTS with Yarn cache |
+| Install Dependencies | `yarn install --immutable` |
+| Install Foundry | Installs the nightly Foundry toolchain |
+| Deploy Contracts | Starts local Anvil chain and deploys contracts (generates TypeScript ABIs) |
+| Lint | Runs `yarn next:lint --max-warnings=0` (zero-tolerance ESLint) |
+| Type Check | Runs `yarn next:check-types` (strict TypeScript) |
+
+**Environment Secrets Used**: `ETHERSCAN_API_KEY`
+
+### Vercel
+
+The frontend auto-deploys to Vercel on push. Production deployments use:
+
+```bash
+yarn vercel:yolo --prod  # Deploys with NEXT_PUBLIC_IGNORE_BUILD_ERROR=true
+```
+
+This flag allows deployment even with non-critical TypeScript warnings, useful during rapid iteration on testnet.
+
+---
+
 ## Deployment
 
 ### Frontend (Vercel)
@@ -907,11 +1004,34 @@ curl "http://localhost:3000/api/v1/history?address=0xd8dA6BF26964aF9D7eEd9e03E53
 yarn vercel
 ```
 
-### Smart Contracts (Base Sepolia)
+### Smart Contracts
+
+Currently deployed on **localhost only** (Anvil, chain ID 31337). To deploy to a live testnet:
 
 ```bash
+# Deploy to Base Sepolia (default testnet)
 yarn deploy --network baseSepolia
+
+# Deploy to other supported testnets
+yarn deploy --network sepolia
+yarn deploy --network arbitrumSepolia
+yarn deploy --network optimismSepolia
+
+# Verify contracts on block explorer
+yarn verify --network baseSepolia
 ```
+
+After deployment, ABIs are auto-generated to `packages/nextjs/contracts/deployedContracts.ts`.
+
+**Current contract addresses (localhost / chain 31337):**
+
+| Contract | Address |
+|----------|---------|
+| CreditScoreRegistry | `0x700b6a60ce7eaaea56f065753d8dcb9653dbad35` |
+| CreditPassport | `0xa15bb66138824a1c7167f5e85b957d04dd34e468` |
+| MultiWalletLinker | `0xb19b36b1456e65e3a6d514d3f715f204bd59f431` |
+
+> These addresses are for local development only. They will change when deployed to a live testnet or mainnet.
 
 ### ML Service (Docker)
 
@@ -920,6 +1040,27 @@ cd ml-service
 docker build -t credbureau-ml .
 docker run -p 8000:8000 credbureau-ml
 ```
+
+The ML service is not yet deployed to a cloud provider. It currently runs locally or in Docker for development.
+
+---
+
+## Roadmap to Mainnet
+
+The following milestones need to be completed before CredBureau can move from testnet to mainnet:
+
+| # | Milestone | Status | Description |
+|---|-----------|--------|-------------|
+| 1 | **Smart contract security audit** | Not started | Third-party audit of CreditScoreRegistry, CreditPassport, and MultiWalletLinker contracts |
+| 2 | **Deploy contracts to Base mainnet** | Not started | Primary deployment target. Also deploy to Arbitrum and Optimism mainnet |
+| 3 | **Retrain ML model on real data** | Not started | Export real scoring data from Supabase, retrain XGBoost on actual wallet behavior instead of synthetic data |
+| 4 | **Production rate limiting** | Not started | Enforce API rate limits (free: 100 req/min, pro: 1000, enterprise: 10000) with API key authentication |
+| 5 | **Production Supabase instance** | Not started | Migrate from development to production-grade Supabase project with backups and monitoring |
+| 6 | **Finalize EAS schema** | Not started | Lock down the credit score schema before mainnet registration (schema is immutable once registered) |
+| 7 | **Deploy ML service to cloud** | Not started | Host the FastAPI ML service on a cloud provider (e.g., Railway, Fly.io, AWS) for production availability |
+| 8 | **Gas sponsorship / paymaster** | Not started | Evaluate gasless attestation minting via ERC-4337 paymaster to reduce user friction on mainnet |
+| 9 | **SDK publish to npm** | Not started | Publish `@credbureau/sdk` to npm registry for protocol integrators |
+| 10 | **Documentation site** | Not started | Dedicated docs site for API reference, SDK guides, and integration tutorials |
 
 ---
 
@@ -930,7 +1071,7 @@ docker run -p 8000:8000 credbureau-ml
 | **Deterministic scoring as primary** | Reproducible, auditable, no model dependency. ML enhances but never blocks. |
 | **Promise.allSettled for data fetching** | No single data source failure blocks scoring. Confidence field shows completeness. |
 | **EAS for attestations** | Standard, widely adopted, on-chain verifiable. Revocable + expirable. |
-| **Base Sepolia as default** | Cheapest L2 testnet. EAS deployed at predeploy addresses. ~$0.005/attestation on mainnet. |
+| **Base Sepolia as default attestation chain** | Cheapest L2 testnet. EAS deployed at predeploy address (`0x4200...0021`). Free attestations on testnet, ~$0.005/attestation on Base mainnet. Chosen over Ethereum Sepolia because L2 predeploy addresses are simpler and Base has strong ecosystem adoption. |
 | **Auto-register EAS schemas** | No manual deployment step. Registers on first attestation per chain. |
 | **Soulbound passport NFT** | Non-transferable ensures credit identity stays with the wallet. |
 | **GoldRush SDK over raw fetch** | Typed responses, built-in error handling, `getTransactionSummary` gives real first-tx date. |

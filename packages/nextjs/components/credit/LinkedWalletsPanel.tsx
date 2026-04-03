@@ -18,6 +18,7 @@ const CHAIN_COLORS: Record<string, string> = {
   arbitrum: "#2D374B",
   optimism: "#FF0420",
   base: "#0052FF",
+  solana: "#9945FF",
 };
 
 export default function LinkedWalletsPanel({ wallets, onLinkWallet, onUnlinkWallet }: LinkedWalletsPanelProps) {
@@ -28,13 +29,22 @@ export default function LinkedWalletsPanel({ wallets, onLinkWallet, onUnlinkWall
           <Wallet className="w-5 h-5 text-blue-400" />
           <h3 className="text-sm font-semibold text-white">Linked Wallets</h3>
         </div>
-        <button
-          onClick={onLinkWallet}
-          className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-xs font-medium text-blue-400 hover:bg-blue-500/20 transition-colors"
-        >
-          <Plus className="w-3.5 h-3.5" />
-          Link Wallet
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onLinkWallet}
+            className="flex items-center gap-1.5 rounded-lg bg-blue-500/10 border border-blue-500/20 px-3 py-1.5 text-xs font-medium text-blue-400 hover:bg-blue-500/20 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Link EVM
+          </button>
+          <button
+            onClick={onLinkWallet}
+            className="flex items-center gap-1.5 rounded-lg bg-purple-500/10 border border-purple-500/20 px-3 py-1.5 text-xs font-medium text-purple-400 hover:bg-purple-500/20 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Link Solana
+          </button>
+        </div>
       </div>
 
       <motion.div className="space-y-2" variants={staggerContainer} initial="initial" animate="animate">
@@ -63,7 +73,18 @@ export default function LinkedWalletsPanel({ wallets, onLinkWallet, onUnlinkWall
                     </span>
                   )}
                 </div>
-                <span className="text-xs text-gray-500 capitalize">{wallet.chain}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs text-gray-500 capitalize">{wallet.chain}</span>
+                  <span
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full ${
+                      wallet.chainType === "solana"
+                        ? "bg-purple-500/10 text-purple-400"
+                        : "bg-blue-500/10 text-blue-400"
+                    }`}
+                  >
+                    {wallet.chainType === "solana" ? "SOL" : "EVM"}
+                  </span>
+                </div>
               </div>
             </div>
 

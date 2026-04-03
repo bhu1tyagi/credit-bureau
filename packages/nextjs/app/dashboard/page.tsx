@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
+import { useWallet } from "@solana/wallet-adapter-react";
 import confetti from "canvas-confetti";
 import { type Variants, motion } from "framer-motion";
 import {
@@ -26,13 +27,14 @@ import ImprovementTips from "~~/components/credit/ImprovementTips";
 import LinkedWalletsPanel from "~~/components/credit/LinkedWalletsPanel";
 import PercentileRanking from "~~/components/credit/PercentileRanking";
 import ScoreHistoryChart from "~~/components/credit/ScoreHistoryChart";
+import { SolanaWalletButton } from "~~/components/solana/SolanaWalletButton";
 import { useAttestation } from "~~/hooks/useAttestation";
 import { useCreditScore } from "~~/hooks/useCreditScore";
 import { useLinkedWallets } from "~~/hooks/useLinkedWallets";
 import { useScoreHistory } from "~~/hooks/useScoreHistory";
 import { staggerContainer, staggerItem } from "~~/lib/animations";
 import { timeAgo, truncateAddress } from "~~/lib/utils";
-import { type Attestation, RISK_TIER_COLORS, type RiskTier, type ScoreFactor } from "~~/types/credit";
+import { type Attestation, type ChainType, RISK_TIER_COLORS, type RiskTier, type ScoreFactor } from "~~/types/credit";
 
 // ============================================
 // Section animation wrapper
@@ -56,13 +58,63 @@ const sectionVariants: Variants = {
 // ============================================
 
 function DashboardPage() {
-  const { address, isConnected } = useAccount();
+  const { address: evmAddress, isConnected: evmConnected } = useAccount();
+  const { publicKey: solanaPublicKey, connected: solanaConnected } = useWallet();
+  const [activeChainType, setActiveChainType] = useState<ChainType>("evm");
 
-  if (!isConnected || !address) {
+  const solanaAddress = solanaPublicKey?.toBase58();
+  const hasAnyConnection = evmConnected || solanaConnected;
+
+  if (!hasAnyConnection) {
     return <ConnectWalletPrompt />;
   }
 
-  return <DashboardContent address={address} />;
+  const activeAddress = activeChainType === "solana" && solanaAddress ? solanaAddress : evmAddress;
+
+  return (
+    <div>
+      {/* Chain type toggle */}
+      {(evmConnected || solanaConnected) && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-4">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveChainType("evm")}
+              disabled={!evmConnected}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeChainType === "evm"
+                  ? "bg-blue-500/20 text-blue-400 border border-blue-500/30"
+                  : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
+              } ${!evmConnected ? "opacity-40 cursor-not-allowed" : ""}`}
+            >
+              EVM Wallets
+            </button>
+            <button
+              onClick={() => setActiveChainType("solana")}
+              disabled={!solanaConnected}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                activeChainType === "solana"
+                  ? "bg-purple-500/20 text-purple-400 border border-purple-500/30"
+                  : "text-gray-400 hover:text-white hover:bg-white/5 border border-transparent"
+              } ${!solanaConnected ? "opacity-40 cursor-not-allowed" : ""}`}
+            >
+              Solana
+            </button>
+            {!solanaConnected && (
+              <div className="ml-2">
+                <SolanaWalletButton />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeAddress ? (
+        <DashboardContent address={activeAddress} />
+      ) : (
+        <ConnectWalletPrompt />
+      )}
+    </div>
+  );
 }
 
 // ============================================

@@ -11,18 +11,89 @@ import {
   CREDIT_SCORE_SCHEMA_UIDS,
   EASSCAN_URLS,
   EAS_ADDRESSES,
+  SCHEMA_REGISTRY_ADDRESSES,
 } from "~~/lib/constants";
 
+export interface EASConfig {
+  easAddress: string;
+  schemaRegistry: string;
+  easScanUrl: string;
+}
+
+const CHAIN_ID_TO_NAME: Record<number, string> = {
+  1: "ethereum",
+  8453: "base",
+  42161: "arbitrum",
+  10: "optimism",
+  11155111: "sepolia",
+  84532: "base-sepolia",
+  421614: "arbitrum-sepolia",
+  11155420: "optimism-sepolia",
+};
+
+export function getEASConfig(chainIdOrName: number | string): EASConfig | null {
+  const chainName = typeof chainIdOrName === "number" ? CHAIN_ID_TO_NAME[chainIdOrName] : chainIdOrName;
+  if (!chainName) return null;
+
+  const easAddress = EAS_ADDRESSES[chainName];
+  const schemaRegistry = SCHEMA_REGISTRY_ADDRESSES[chainName];
+  const easScanUrl = EASSCAN_URLS[chainName];
+
+  if (!easAddress || !schemaRegistry || !easScanUrl) return null;
+  return { easAddress, schemaRegistry, easScanUrl };
+}
+
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      if (attempt === maxRetries - 1) throw error;
+      const delay = Math.pow(2, attempt) * 1000;
+      console.warn(`[EAS] Attempt ${attempt + 1} failed, retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+  throw new Error("withRetry: unreachable");
+}
+
+export async function estimateAttestationGas(params: {
+  chain: string;
+  signer: ethers.Signer;
+  walletAddress: string;
+  creditScore: number;
+  riskTier: number;
+  dataHash: string;
+  hasOffChainData: boolean;
+  modelVersion: number;
+}): Promise<{ gasEstimate: bigint; gasCostWei: bigint; gasCostEth: string }> {
+  const easAddress = EAS_ADDRESSES[params.chain];
+  if (!easAddress) throw new Error(`EAS not available on chain: ${params.chain}`);
+
+  const provider = params.signer.provider;
+  if (!provider) throw new Error("Signer must have a provider for gas estimation");
+
+  const feeData = await provider.getFeeData();
+  const gasPrice = feeData.gasPrice || 0n;
+
+  // Attestation transactions typically cost 100k-200k gas on L2s
+  const estimatedGas = 200_000n;
+  const gasCostWei = estimatedGas * gasPrice;
+  const gasCostEth = ethers.formatEther(gasCostWei);
+
+  return { gasEstimate: estimatedGas, gasCostWei, gasCostEth };
+}
+
 /**
- * Create a credit score attestation on-chain.
+ * Create a credit score attestation on-chain with retry logic.
  */
 export async function createCreditScoreAttestation(params: {
   chain: string;
   signer: ethers.Signer;
   walletAddress: string;
   creditScore: number;
-  riskTier: number; // 1=Excellent, 2=Good, 3=Fair, 4=Poor, 5=VeryPoor
-  dataHash: string; // bytes32 hash of scoring inputs
+  riskTier: number;
+  dataHash: string;
   hasOffChainData: boolean;
   modelVersion: number;
 }): Promise<{
@@ -53,26 +124,23 @@ export async function createCreditScoreAttestation(params: {
     { name: "modelVersion", value: params.modelVersion, type: "uint8" },
   ]);
 
-  const tx = await eas.attest({
-    schema: schemaUid,
-    data: {
-      recipient: params.walletAddress,
-      expirationTime: BigInt(Math.floor(Date.now() / 1000) + ATTESTATION_TTL_SECONDS),
-      revocable: true,
-      data: encodedData,
-    },
+  return withRetry(async () => {
+    const tx = await eas.attest({
+      schema: schemaUid,
+      data: {
+        recipient: params.walletAddress,
+        expirationTime: BigInt(Math.floor(Date.now() / 1000) + ATTESTATION_TTL_SECONDS),
+        revocable: true,
+        data: encodedData,
+      },
+    });
+
+    const attestationUid = await tx.wait();
+    const txHash = typeof tx === "object" && "tx" in tx ? (tx as any).tx?.hash : attestationUid;
+    const easScanUrl = `${EASSCAN_URLS[params.chain]}/attestation/view/${attestationUid}`;
+
+    return { attestationUid, txHash, easScanUrl, schemaUid };
   });
-
-  const attestationUid = await tx.wait();
-  const txHash = typeof tx === "object" && "tx" in tx ? (tx as any).tx?.hash : attestationUid;
-  const easScanUrl = `${EASSCAN_URLS[params.chain]}/attestation/view/${attestationUid}`;
-
-  return {
-    attestationUid,
-    txHash,
-    easScanUrl,
-    schemaUid,
-  };
 }
 
 /**
@@ -104,7 +172,6 @@ export async function verifyAttestation(params: {
     const expired = attestation.expirationTime > 0n && attestation.expirationTime < now;
     const revoked = attestation.revocationTime > 0n;
 
-    // Decode the data
     const encoder = new SchemaEncoder(CREDIT_SCORE_SCHEMA);
     const decoded = encoder.decodeData(attestation.data);
 
@@ -125,17 +192,11 @@ export async function verifyAttestation(params: {
   }
 }
 
-/**
- * Compute a deterministic hash of scoring inputs for attestation.
- */
 export function computeDataHash(profile: Record<string, unknown>): string {
   const sorted = JSON.stringify(profile, Object.keys(profile).sort());
   return ethers.keccak256(ethers.toUtf8Bytes(sorted));
 }
 
-/**
- * Map risk tier string to uint8 for attestation.
- */
 export function riskTierToUint8(tier: string): number {
   const mapping: Record<string, number> = {
     Excellent: 1,

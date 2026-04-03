@@ -15,13 +15,24 @@ interface AttestationSectionProps {
   isMinting: boolean;
 }
 
-// Chain display names → API chain IDs
-const SUPPORTED_CHAINS = [
-  { label: "Base Sepolia", value: "base-sepolia" },
-  { label: "Sepolia", value: "sepolia" },
-  { label: "Arbitrum Sepolia", value: "arbitrum-sepolia" },
-  { label: "Optimism Sepolia", value: "optimism-sepolia" },
+import { isMainnet } from "~~/lib/constants";
+import { getGasDisplayText, isPaymasterAvailable } from "~~/lib/paymaster/cdp";
+
+const MAINNET_CHAINS = [
+  { label: "Base", value: "base", chainId: 8453 },
+  { label: "Arbitrum One", value: "arbitrum", chainId: 42161 },
+  { label: "Optimism", value: "optimism", chainId: 10 },
+  { label: "Solana", value: "solana", chainId: 0 },
 ];
+
+const TESTNET_CHAINS = [
+  { label: "Base Sepolia", value: "base-sepolia", chainId: 84532 },
+  { label: "Sepolia", value: "sepolia", chainId: 11155111 },
+  { label: "Arbitrum Sepolia", value: "arbitrum-sepolia", chainId: 421614 },
+  { label: "Optimism Sepolia", value: "optimism-sepolia", chainId: 11155420 },
+];
+
+const SUPPORTED_CHAINS = isMainnet() ? MAINNET_CHAINS : TESTNET_CHAINS;
 
 function getExpiryText(expiresAt: number): string {
   const diff = expiresAt - Date.now();
@@ -91,6 +102,11 @@ export default function AttestationSection({ attestations, onMint, isMinting }: 
           )}
         </div>
 
+        {/* Gas info */}
+        <span className="text-xs text-gray-500 hidden sm:inline-flex items-center gap-1">
+          Gas: {getGasDisplayText(SUPPORTED_CHAINS.find(c => c.value === selectedChain)?.chainId || 0)}
+        </span>
+
         {/* Mint button */}
         <button
           onClick={handleMint}
@@ -143,12 +159,12 @@ export default function AttestationSection({ attestations, onMint, isMinting }: 
               </div>
 
               <a
-                href={att.easScanUrl}
+                href={att.easScanUrl || `https://solscan.io/tx/${att.attestationUid}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-blue-400 hover:bg-blue-500/10 transition-colors"
               >
-                EASScan
+                {att.chain === "solana" ? "Solscan" : "EASScan"}
                 <ExternalLink className="w-3 h-3" />
               </a>
             </motion.div>

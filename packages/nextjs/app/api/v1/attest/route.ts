@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { Keypair } from "@solana/web3.js";
 import { ethers } from "ethers";
 import { isAddress } from "viem";
 import { computeDataHash, createCreditScoreAttestation, riskTierToUint8 } from "~~/lib/attestation/eas";
+import { createSolanaAttestation, getSASConfig } from "~~/lib/attestation/sas";
+import { DEFAULT_ATTESTATION_CHAIN, detectChainType } from "~~/lib/constants";
 import { createServerClient } from "~~/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
@@ -13,27 +16,33 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: { code: "INVALID_BODY", message: "Invalid JSON body" } }, { status: 400 });
   }
 
-  const { address, chain = "base-sepolia" } = body;
+  const { address, chain = DEFAULT_ATTESTATION_CHAIN } = body;
 
-  if (!address || !isAddress(address)) {
+  if (!address) {
     return NextResponse.json(
-      { error: { code: "INVALID_ADDRESS", message: "Valid Ethereum address required" } },
+      { error: { code: "INVALID_ADDRESS", message: "Address is required" } },
       { status: 400 },
     );
   }
 
-  const privateKey = process.env.EAS_ATTESTER_PRIVATE_KEY;
-  if (!privateKey) {
-    return NextResponse.json({ error: { code: "CONFIG_ERROR", message: "Attester not configured" } }, { status: 500 });
+  const chainType = detectChainType(address);
+  const isSolanaAttestation = chain === "solana" || chainType === "solana";
+
+  if (chainType === "evm" && !isAddress(address)) {
+    return NextResponse.json(
+      { error: { code: "INVALID_ADDRESS", message: "Invalid EVM address" } },
+      { status: 400 },
+    );
   }
 
   try {
-    // Get latest score from Supabase
     const supabase = createServerClient();
+    const walletAddr = chainType === "evm" ? address.toLowerCase() : address;
+
     const { data: scoreData } = await supabase
       .from("credit_scores")
       .select("*")
-      .eq("wallet_address", address.toLowerCase())
+      .eq("wallet_address", walletAddr)
       .order("created_at", { ascending: false })
       .limit(1)
       .single();
@@ -45,60 +54,123 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create signer
-    const rpcUrls: Record<string, string> = {
-      sepolia: process.env.SEPOLIA_RPC_URL || "https://rpc.sepolia.org",
-      "base-sepolia": process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
-      "arbitrum-sepolia": process.env.ARBITRUM_SEPOLIA_RPC_URL || "https://sepolia-rollup.arbitrum.io/rpc",
-      "optimism-sepolia": process.env.OPTIMISM_SEPOLIA_RPC_URL || "https://sepolia.optimism.io",
-      ethereum: process.env.ETHEREUM_RPC_URL || "https://eth.llamarpc.com",
-      base: process.env.BASE_RPC_URL || "https://mainnet.base.org",
-      arbitrum: process.env.ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc",
-      optimism: process.env.OPTIMISM_RPC_URL || "https://mainnet.optimism.io",
-    };
+    if (isSolanaAttestation) {
+      return await handleSolanaAttestation(supabase, scoreData, address);
+    }
 
-    const provider = new ethers.JsonRpcProvider(rpcUrls[chain]);
-    const signer = new ethers.Wallet(privateKey, provider);
-
-    const dataHash = computeDataHash(scoreData.breakdown);
-
-    const result = await createCreditScoreAttestation({
-      chain,
-      signer,
-      walletAddress: address,
-      creditScore: scoreData.score,
-      riskTier: riskTierToUint8(scoreData.risk_tier),
-      dataHash,
-      hasOffChainData: scoreData.has_offchain_data || false,
-      modelVersion: scoreData.model_version || 1,
-    });
-
-    // Store attestation in Supabase
-    await supabase.from("attestations").insert({
-      user_id: scoreData.user_id,
-      score_id: scoreData.id,
-      attestation_uid: result.attestationUid,
-      chain,
-      tx_hash: result.txHash,
-      schema_uid: result.schemaUid,
-      is_onchain: true,
-      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      revoked: false,
-    });
-
-    return NextResponse.json({
-      attestationUID: result.attestationUid,
-      txHash: result.txHash,
-      chain,
-      easScanURL: result.easScanUrl,
-    });
+    return await handleEVMAttestation(supabase, scoreData, address, chain);
   } catch (error) {
     const errMsg = error instanceof Error ? error.message : String(error);
-    const errStack = error instanceof Error ? error.stack : undefined;
-    console.error("Attestation creation error:", { message: errMsg, stack: errStack, chain, address });
+    console.error("Attestation creation error:", { message: errMsg, chain, address });
     return NextResponse.json(
       { error: { code: "ATTESTATION_FAILED", message: "Failed to create attestation" } },
       { status: 500 },
     );
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function handleEVMAttestation(supabase: any, scoreData: any, address: string, chain: string) {
+  const privateKey = process.env.EAS_ATTESTER_PRIVATE_KEY;
+  if (!privateKey) {
+    return NextResponse.json({ error: { code: "CONFIG_ERROR", message: "Attester not configured" } }, { status: 500 });
+  }
+
+  const rpcUrls: Record<string, string> = {
+    sepolia: process.env.SEPOLIA_RPC_URL || "https://rpc.sepolia.org",
+    "base-sepolia": process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
+    "arbitrum-sepolia": process.env.ARBITRUM_SEPOLIA_RPC_URL || "https://sepolia-rollup.arbitrum.io/rpc",
+    "optimism-sepolia": process.env.OPTIMISM_SEPOLIA_RPC_URL || "https://sepolia.optimism.io",
+    ethereum: process.env.ETHEREUM_RPC_URL || "https://eth.llamarpc.com",
+    base: process.env.BASE_RPC_URL || "https://mainnet.base.org",
+    arbitrum: process.env.ARBITRUM_RPC_URL || "https://arb1.arbitrum.io/rpc",
+    optimism: process.env.OPTIMISM_RPC_URL || "https://mainnet.optimism.io",
+  };
+
+  const provider = new ethers.JsonRpcProvider(rpcUrls[chain]);
+  const signer = new ethers.Wallet(privateKey, provider);
+  const dataHash = computeDataHash(scoreData.breakdown);
+
+  const result = await createCreditScoreAttestation({
+    chain,
+    signer,
+    walletAddress: address,
+    creditScore: scoreData.score,
+    riskTier: riskTierToUint8(scoreData.risk_tier),
+    dataHash,
+    hasOffChainData: scoreData.has_offchain_data || false,
+    modelVersion: scoreData.model_version || 1,
+  });
+
+  await supabase.from("attestations").insert({
+    user_id: scoreData.user_id,
+    score_id: scoreData.id,
+    attestation_uid: result.attestationUid,
+    chain,
+    tx_hash: result.txHash,
+    schema_uid: result.schemaUid,
+    is_onchain: true,
+    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    revoked: false,
+    chain_type: "evm",
+  });
+
+  return NextResponse.json({
+    attestationUID: result.attestationUid,
+    txHash: result.txHash,
+    chain,
+    chainType: "evm",
+    easScanURL: result.easScanUrl,
+  });
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function handleSolanaAttestation(supabase: any, scoreData: any, address: string) {
+  const attesterKey = process.env.SOLANA_ATTESTER_PRIVATE_KEY || process.env.EAS_ATTESTER_PRIVATE_KEY;
+  if (!attesterKey) {
+    return NextResponse.json({ error: { code: "CONFIG_ERROR", message: "Solana attester not configured" } }, { status: 500 });
+  }
+
+  const config = getSASConfig();
+
+  let payer: Keypair;
+  try {
+    const keyBytes = JSON.parse(attesterKey);
+    payer = Keypair.fromSecretKey(Uint8Array.from(keyBytes));
+  } catch {
+    const bs58Module = await import("bs58");
+    payer = Keypair.fromSecretKey(bs58Module.default.decode(attesterKey));
+  }
+
+  const dataHash = computeDataHash(scoreData.breakdown);
+
+  const result = await createSolanaAttestation(config, payer, {
+    walletAddress: address,
+    creditScore: scoreData.score,
+    riskTier: riskTierToUint8(scoreData.risk_tier),
+    timestamp: Math.floor(Date.now() / 1000),
+    dataHash,
+    hasOffChainData: scoreData.has_offchain_data || false,
+    modelVersion: scoreData.model_version || 1,
+  });
+
+  await supabase.from("attestations").insert({
+    user_id: scoreData.user_id,
+    score_id: scoreData.id,
+    attestation_uid: result.attestationId,
+    chain: "solana",
+    tx_hash: result.txSignature,
+    is_onchain: true,
+    expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    revoked: false,
+    chain_type: "solana",
+  });
+
+  return NextResponse.json({
+    attestationUID: result.attestationId,
+    txSignature: result.txSignature,
+    chain: "solana",
+    chainType: "solana",
+    solscanURL: `https://solscan.io/tx/${result.txSignature}`,
+  });
 }

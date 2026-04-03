@@ -45,10 +45,13 @@ export interface ScoreHistoryPoint {
 // Wallet Types
 // ============================================
 
+export type ChainType = "evm" | "solana";
+
 export interface LinkedWallet {
   id: string;
   address: string;
   chain: string;
+  chainType: ChainType;
   isPrimary: boolean;
   linkedAt: number;
   label?: string;
@@ -62,15 +65,38 @@ export interface WalletProfile {
   defiProtocols: string[];
   totalBorrows: number;
   totalRepays: number;
-  repaymentRatio: number; // 0–1
+  repaymentRatio: number; // 0-1
   liquidationCount: number;
   liquidationVolumeUsd: number;
-  stablecoinRatio: number; // 0–1
+  stablecoinRatio: number; // 0-1
   totalValueUsd: number;
   tokenCount: number;
   nftCount: number;
   governanceParticipation: number;
   bridgeUsageCount: number;
+}
+
+export interface SolanaWalletProfile extends WalletProfile {
+  chain: "solana-mainnet";
+  address: string;
+  stakingData: {
+    totalStakedSol: number;
+    stakingProtocols: string[];
+  };
+  lendingData: {
+    totalBorrowsUsd: number;
+    totalRepaysUsd: number;
+    repaymentRatio: number;
+    liquidationCount: number;
+    activeBorrowsUsd: number;
+    protocols: string[];
+  };
+}
+
+export type UnifiedWalletProfile = WalletProfile | SolanaWalletProfile;
+
+export function isSolanaProfile(profile: UnifiedWalletProfile): profile is SolanaWalletProfile {
+  return "chain" in profile && profile.chain === "solana-mainnet";
 }
 
 // ============================================

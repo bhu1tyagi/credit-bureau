@@ -1,5 +1,5 @@
-import type { CreditScore, ScoreBreakdown, WalletProfile } from "~~/types/credit";
-import { SCORE_MAX, SCORE_MIN, getRiskTier } from "~~/types/credit";
+import type { CreditScore, ScoreBreakdown, UnifiedWalletProfile, WalletProfile } from "~~/types/credit";
+import { SCORE_MAX, SCORE_MIN, getRiskTier, isSolanaProfile } from "~~/types/credit";
 
 // ============================================
 // Deterministic Weighted Scoring Algorithm
@@ -45,16 +45,19 @@ function scoreWalletAge(days: number): { score: number; details: string } {
   return { score, details: `Wallet age: ${days} days` };
 }
 
-function scoreTxFrequency(txCount: number): { score: number; details: string } {
+function scoreTxFrequency(txCount: number, isSolana = false): { score: number; details: string } {
   let score: number;
-  if (txCount < 10) {
-    score = 0;
-  } else if (txCount < 50) {
-    score = 30;
-  } else if (txCount < 200) {
-    score = 60;
+  if (isSolana) {
+    // Solana has much cheaper fees so users typically have more transactions
+    if (txCount < 100) score = 0;
+    else if (txCount < 500) score = 30;
+    else if (txCount < 2000) score = 60;
+    else score = 100;
   } else {
-    score = 100;
+    if (txCount < 10) score = 0;
+    else if (txCount < 50) score = 30;
+    else if (txCount < 200) score = 60;
+    else score = 100;
   }
   return { score, details: `Transaction count: ${txCount}` };
 }
@@ -190,12 +193,12 @@ function computeOffChainBonus(data?: OffChainData): { score: number; maxScore: n
 // Main Scoring Function
 // ============================================
 
-export function computeCreditScore(profile: WalletProfile, offChainData?: OffChainData): CreditScore {
+export function computeCreditScore(profile: UnifiedWalletProfile, offChainData?: OffChainData): CreditScore {
   const BASE_SCORE = 300;
+  const solana = isSolanaProfile(profile);
 
-  // Compute each factor
   const walletAge = scoreWalletAge(profile.walletAgeDays);
-  const txFrequency = scoreTxFrequency(profile.txCount);
+  const txFrequency = scoreTxFrequency(profile.txCount, solana);
   const defiDiversity = scoreDefiDiversity(profile.defiProtocolCount);
   const repayment = scoreRepaymentHistory(profile.repaymentRatio, profile.totalBorrows);
   const liquidation = scoreLiquidationPenalty(profile.liquidationCount);

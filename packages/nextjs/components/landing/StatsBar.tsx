@@ -43,7 +43,7 @@ function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
 export default function StatsBar() {
   const [stats, setStats] = useState<Stat[]>([
     { value: 0, suffix: "", label: "Wallets Scored" },
-    { value: 5, suffix: "", label: "Chains Supported" },
+    { value: 6, suffix: "", label: "Chains Supported" },
     { value: 0, suffix: "", label: "Attestations Created" },
     { value: 850, suffix: "", label: "Max Score" },
   ]);
@@ -54,7 +54,7 @@ export default function StatsBar() {
       .then(data => {
         setStats([
           { value: data.walletsScored || 0, suffix: "", label: "Wallets Scored" },
-          { value: data.chainsSupported || 5, suffix: "", label: "Chains Supported" },
+          { value: data.chainsSupported || 6, suffix: "", label: "Chains Supported" },
           { value: data.attestationsCreated || 0, suffix: "", label: "Attestations Created" },
           { value: 850, suffix: "", label: "Max Score" },
         ]);

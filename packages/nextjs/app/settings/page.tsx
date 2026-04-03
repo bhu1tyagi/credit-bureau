@@ -36,7 +36,7 @@ const TAB_ICONS: Record<Tab, React.ReactNode> = {
   Export: <Download className="w-4 h-4" />,
 };
 
-const SUPPORTED_CHAINS = ["Ethereum", "Polygon", "Arbitrum", "Optimism", "Base"];
+const SUPPORTED_CHAINS = ["Ethereum", "Polygon", "Arbitrum", "Optimism", "Base", "Solana"];
 
 const CHAIN_COLORS: Record<string, string> = {
   ethereum: "#627EEA",
@@ -44,6 +44,7 @@ const CHAIN_COLORS: Record<string, string> = {
   arbitrum: "#2D374B",
   optimism: "#FF0420",
   base: "#0052FF",
+  solana: "#9945FF",
 };
 
 // ---------------------------------------------------------------------------

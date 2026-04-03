@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { isAddress } from "viem";
 import { aggregateWalletData } from "~~/lib/data/aggregator";
+import { aggregateSolanaWalletData } from "~~/lib/data/solana-aggregator";
+import { detectChainType } from "~~/lib/constants";
 import { computeCreditScore } from "~~/lib/scoring/deterministic";
 import { blendScores, getMLPrediction } from "~~/lib/scoring/ml-client";
 import { createServerClient } from "~~/lib/supabase/server";
@@ -10,31 +12,60 @@ export async function GET(request: NextRequest) {
   const address = searchParams.get("address");
   const chainsParam = searchParams.get("chains");
 
-  // Validate input
-  if (!address || !isAddress(address)) {
+  if (!address) {
     return NextResponse.json(
-      { error: { code: "INVALID_ADDRESS", message: "Valid Ethereum address required" } },
+      { error: { code: "INVALID_ADDRESS", message: "Address is required" } },
+      { status: 400 },
+    );
+  }
+
+  const chainType = detectChainType(address);
+
+  if (chainType === "unknown") {
+    return NextResponse.json(
+      { error: { code: "INVALID_ADDRESS", message: "Valid EVM or Solana address required" } },
+      { status: 400 },
+    );
+  }
+
+  if (chainType === "evm" && !isAddress(address)) {
+    return NextResponse.json(
+      { error: { code: "INVALID_ADDRESS", message: "Invalid EVM address checksum" } },
       { status: 400 },
     );
   }
 
   const chains = chainsParam
     ? chainsParam.split(",").map(c => c.trim())
-    : ["eth-mainnet", "base-mainnet", "arbitrum-mainnet"];
+    : chainType === "solana"
+      ? ["solana-mainnet"]
+      : ["eth-mainnet", "base-mainnet", "arbitrum-mainnet"];
 
   try {
-    // Aggregate on-chain data from all sources
-    const { profile, dataSources, failedSources, confidence } = await aggregateWalletData(address, chains);
+    let profile, dataSources, failedSources, confidence;
 
-    // Compute deterministic score
+    if (chainType === "solana") {
+      const solanaResult = await aggregateSolanaWalletData(address);
+      profile = solanaResult.profile;
+      dataSources = solanaResult.dataSources;
+      failedSources = solanaResult.failedSources;
+      confidence = solanaResult.confidence;
+    } else {
+      const evmResult = await aggregateWalletData(address, chains);
+      profile = evmResult.profile;
+      dataSources = evmResult.dataSources;
+      failedSources = evmResult.failedSources;
+      confidence = evmResult.confidence;
+    }
+
     const deterministicResult = computeCreditScore(profile);
 
-    // Attempt ML prediction
     const mlPrediction = await getMLPrediction(profile);
     const { score, modelVersion, confidence: blendedConfidence } = blendScores(deterministicResult.score, mlPrediction);
 
     const result = {
       address,
+      chainType,
       score,
       riskTier: deterministicResult.riskTier,
       breakdown: deterministicResult.breakdown,
@@ -47,12 +78,11 @@ export async function GET(request: NextRequest) {
       cached: false,
     };
 
-    // Persist to Supabase (best effort)
     try {
       const supabase = createServerClient();
       if (supabase) {
         await supabase.from("credit_scores").insert({
-          wallet_address: address.toLowerCase(),
+          wallet_address: chainType === "evm" ? address.toLowerCase() : address,
           score,
           risk_tier: deterministicResult.riskTier,
           breakdown: deterministicResult.breakdown,
@@ -60,6 +90,7 @@ export async function GET(request: NextRequest) {
           chains,
           has_offchain_data: false,
           confidence: Math.round(confidence * 100),
+          chain_type: chainType,
         });
       }
     } catch (error) {
